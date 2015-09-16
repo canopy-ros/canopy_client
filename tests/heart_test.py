@@ -8,9 +8,14 @@ import jammi
 import socket
 import rospy
 import zlib
+import json
 
 
 def test_start():
+    """
+    Tests that the heart class is able to start and send messages over UDP
+    """
+
     rospy.init_node("jammi_test", anonymous=False)
     host, port = "localhost", 5005
     rate = 20
@@ -21,11 +26,11 @@ def test_start():
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind((host, port))
     i = 0
-    while i < 20:
+    while i < 5:
         i += 1
         data_zip, addr = sock.recvfrom(1024)
         data = zlib.decompress(data_zip)
-        print i, data, addr
+        assert(json.loads(data) == heart.data)
     heart.kill()
 
 

@@ -32,7 +32,7 @@ class Heart(object):
         self.port = port
         self.rate = rate
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.data = {}
+        self.data = dict()
         self.running = False
 
     def set_data(self, data):
