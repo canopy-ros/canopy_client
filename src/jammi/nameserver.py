@@ -59,8 +59,8 @@ class NameServer(object):
 
         alive = list()
         ctime = time.time()
-        for name, t in times.iteritems():
-            if ctime - t < interval:
+        for name, t in self.times.iteritems():
+            if ctime - t < self.interval:
                 alive.append(name)
         return alive
 
@@ -114,10 +114,10 @@ class NameServer(object):
         else:
             def __thread():
                 while self.running:
-                    data_zip, _ = sock.recvfrom(1024)
+                    data_zip, _ = self.sock.recvfrom(1024)
                     data_str = zlib.decompress(data_zip)
                     data = json.loads(data_str)
-                    self.master[data["name"]] = data
+                    self.masters[data["name"]] = data
                     self.times[data["name"]] = time.time()
             self.running = True
             self.thread = threading.Thread(target=__thread)
