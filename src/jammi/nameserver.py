@@ -35,6 +35,7 @@ class NameServer(object):
         self.interval = interval
         self.masters = dict()
         self.times = dict()
+        self.new_connections = list()
         self.running = False
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((host, port))
@@ -99,6 +100,24 @@ class NameServer(object):
 
         return self.times[name]
 
+    def discover(self):
+        """
+        Discover new masters
+
+        Returns
+        -------
+        nc: list of strings
+            The new masters on the network
+
+        Notes
+        -----
+        This method resets the `new_connections` variable to an empty list
+        """
+
+        nc = self.new_connections[:]
+        self.new_connections = list()
+        return nc
+
     def start(self):
         """
         Starts the name server thread
@@ -117,6 +136,8 @@ class NameServer(object):
                     data_zip, _ = self.sock.recvfrom(1024)
                     data_str = zlib.decompress(data_zip)
                     data = json.loads(data_str)
+                    if not data["name"] in self.masters:
+                        self.new_connections.append(data["name"])
                     self.masters[data["name"]] = data
                     self.times[data["name"]] = time.time()
             self.running = True
