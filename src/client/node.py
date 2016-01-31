@@ -27,12 +27,10 @@ class JammiNode(object):
     def run(self):
         for topic, msg_type in self.topics:
             self.create_subscriber(topic, msg_type)
-        r = rospy.Rate(30)
         while not rospy.is_shutdown():
             updates = self.conn.updates()
             for v in updates.values():
                 self.pub_man.publish(v)
-            r.sleep()
 
     def create_subscriber(self, topic, msg_type):
         namespace, msg_name = msg_type.split("/")

@@ -50,6 +50,6 @@ class Connection(threading.Thread):
         return MMClient.send_message(payload)
 
     def updates(self):
-        payloads = copy.deepcopy(MMClient.updates)
+        payloads = copy.copy(MMClient.updates)
         MMClient.updates = dict()
         return payloads
