@@ -20,7 +20,8 @@ class MMServerProtocol(WebSocketServerProtocol):
                 msg = json.loads(payload)
                 if msg["to"] == "*":
                     for name in common.clients.keys():
-                        common.get_client(msg["to"]).sendMessage(payload)
+                        if name != msg["from"]:
+                            common.get_client(name).sendMessage(payload)
                 else:
                     common.get_client(msg["to"]).sendMessage(payload)
             except KeyError:
