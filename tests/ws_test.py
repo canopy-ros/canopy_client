@@ -63,9 +63,9 @@ def create_websocket():
 
 def test_ws_server():
     log.startLogging(sys.stdout)
-    create_websocket()
+    # create_websocket()
     factory = WebSocketServerFactory("ws://localhost:9000", debug=True)
     factory.protocol = server.MMServerProtocol
     reactor.listenTCP(9000, factory)
-    task.LoopingCall(print_conns).start(1.0)
+    # task.LoopingCall(print_conns).start(1.0)
     reactor.run()

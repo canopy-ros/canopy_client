@@ -16,12 +16,15 @@ class MMServerProtocol(WebSocketServerProtocol):
 
     def onMessage(self, payload, is_binary):
         if not is_binary:
-            msg = json.loads(payload)
-            if msg["to"] == "*":
-                for name in common.clients.keys():
+            try:
+                msg = json.loads(payload)
+                if msg["to"] == "*":
+                    for name in common.clients.keys():
+                        common.get_client(msg["to"]).sendMessage(payload)
+                else:
                     common.get_client(msg["to"]).sendMessage(payload)
-            else:
-                common.get_client(msg["to"]).sendMessage(payload)
+            except KeyError:
+                pass
 
     def onClose(self, was_clean, code, reason):
         common.remove_client(self.name_of_client)
