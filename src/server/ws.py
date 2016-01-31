@@ -11,9 +11,6 @@ class MMServerProtocol(WebSocketServerProtocol):
         common.add_client(name, self)
         self.name_of_client = name
 
-    def onOpen(self):
-        pass
-
     def onMessage(self, payload, is_binary):
         if not is_binary:
             try:

@@ -34,7 +34,6 @@ class JammiNode(object):
                 self.pub_man.publish(v)
             r.sleep()
 
-
     def create_subscriber(self, topic, msg_type):
         namespace, msg_name = msg_type.split("/")
         mod = __import__(namespace + ".msg")
