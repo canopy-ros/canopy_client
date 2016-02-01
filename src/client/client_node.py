@@ -1,31 +1,30 @@
+#!/usr/bin/env python
 
 import rospy
-import sys
 import time
-import string
 import publishermanager as pm
 import json
 from rospy_message_converter import message_converter as mc
 from connection import Connection
-from geometry_msgs.msg import Point
 
 
-NODE_NAME = "jammi"
+NODE_NAME = "jammi_client"
+
 
 class JammiNode(object):
 
-    def __init__(self, host, port, name, topics):
+    def __init__(self, host, port, name, broadcasting):
         self.host = host
         self.port = port
         self.name = name
         self.conn = Connection(host, port, name)
         self.conn.start()
         self.subs = dict()
-        self.topics = topics
+        self.broadcasting = broadcasting
         self.pub_man = pm.PublisherManager()
 
     def run(self):
-        for topic, msg_type in self.topics:
+        for topic, msg_type in self.broadcasting:
             self.create_subscriber(topic, msg_type)
         while not rospy.is_shutdown():
             updates = self.conn.updates()
@@ -55,7 +54,12 @@ class JammiNode(object):
 
 
 if __name__ == "__main__":
-    rospy.init_node(sys.argv[1], anonymous=False)
-    topics = [("/state", "geometry_msgs/Point")]
-    jn = JammiNode("localhost", 9000, sys.argv[1], topics)
+    rospy.init_node(NODE_NAME, anonymous=False)
+    name = rospy.get_param("~name")
+    topics = rospy.get_param("~publishing")
+    types = rospy.get_param("~types")
+    host = rospy.get_param("~host")
+    port = rospy.get_param("~port")
+    broadcasting = zip(topics, types)
+    jn = JammiNode(host, port, name, broadcasting)
     jn.run()

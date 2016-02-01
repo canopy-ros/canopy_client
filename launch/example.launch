@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="jammi" type="client_node.py" name="foo_node" output="screen">
+        <param name="name" value="foo"/>
+        <param name="host" value="localhost"/>
+        <param name="port" value="9000"/>
+        <rosparam>
+            publishing:
+                - /state
+            types:
+                - geometry_msgs/Point
+        </rosparam>
+    </node>
+
+    <node pkg="jammi" type="client_node.py" name="bar_node" output="screen">
+        <param name="name" value="bar"/>
+        <param name="host" value="localhost"/>
+        <param name="port" value="9000"/>
+        <rosparam>
+            publishing:
+                - /state
+            types:
+                - geometry_msgs/Point
+        </rosparam>
+    </node>
+
+    <node pkg="jammi" type="server_node.py" name="jammi_server" output="screen">
+        <param name="host" value="localhost"/>
+        <param name="port" value="9000"/>
+    </node>
+</launch>
