@@ -17,7 +17,8 @@ def run_server(host, port):
     factory = WebSocketServerFactory(url, debug=True)
     factory.protocol = ws.MMServerProtocol
     reactor.listenTCP(port, factory)
-    reactor.run()
+    while not rospy.is_shutdown():
+        reactor.iterate()
 
 
 if __name__ == "__main__":
