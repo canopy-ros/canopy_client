@@ -1,7 +1,6 @@
 
+# import zlib
 import threading
-import string
-import sys
 import json
 import copy
 from twisted.internet import reactor
@@ -20,7 +19,7 @@ class MMClient(WebSocketClientProtocol):
     def onMessage(self, payload, is_binary):
         if not is_binary:
             data = json.loads(payload)
-            MMClient.updates[data["topic"]] = payload
+            MMClient.updates[data["topic"]] = data
 
     @staticmethod
     def send_message(payload):
@@ -46,7 +45,8 @@ class Connection(threading.Thread):
     def stop(self):
         reactor.stop()
 
-    def send_message(self, payload):
+    def send_message(self, data):
+        payload = json.dumps(data)
         return MMClient.send_message(payload)
 
     def updates(self):

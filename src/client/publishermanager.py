@@ -1,5 +1,5 @@
+
 import rospy
-import json
 from rospy_message_converter import message_converter
 
 
@@ -16,8 +16,7 @@ class PublisherManager(object):
             msg_type, msg_dict)
         return msg, msg_cls
 
-    def publish(self, payload):
-        data = json.loads(payload)
+    def publish(self, data):
         msg, msg_cls = self.create_msg(data["msg"], data["type"])
         topic = data["topic"]
         if not topic in self.pubs.keys():

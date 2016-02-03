@@ -3,7 +3,6 @@
 import rospy
 import time
 import publishermanager as pm
-import json
 from rospy_message_converter import message_converter as mc
 from connection import Connection
 
@@ -48,8 +47,7 @@ class JammiNode(object):
             data["type"] = msg_type
             data["stamp"] = time.time()
             data["msg"] = mc.convert_ros_message_to_dictionary(msg)
-            payload = json.dumps(data)
-            self.conn.send_message(payload)
+            self.conn.send_message(data)
         return callback
 
 

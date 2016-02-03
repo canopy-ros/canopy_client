@@ -1,4 +1,5 @@
 
+# import zlib
 import json
 import common
 from autobahn.twisted.websocket import WebSocketServerProtocol

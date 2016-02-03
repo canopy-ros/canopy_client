@@ -23,6 +23,6 @@ def run_server(host, port):
 
 if __name__ == "__main__":
     rospy.init_node(NODE_NAME, anonymous=False)
-    host = rospy.get_param("~host")
-    port = rospy.get_param("~port")
+    host = rospy.get_param("~host", "localhost")
+    port = rospy.get_param("~port", 9000)
     run_server(host, port)
