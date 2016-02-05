@@ -22,9 +22,9 @@ class MMClient(WebSocketClientProtocol):
             MMClient.updates[data["topic"]] = data
 
     @staticmethod
-    def send_message(payload):
+    def send_message(payload, is_binary):
         if not MMClient.client is None:
-            MMClient.client.sendMessage(payload)
+            MMClient.client.sendMessage(payload, is_binary)
 
 
 class Connection(threading.Thread):
@@ -47,7 +47,8 @@ class Connection(threading.Thread):
 
     def send_message(self, data):
         payload = json.dumps(data)
-        return MMClient.send_message(payload)
+        is_binary = False
+        return MMClient.send_message(payload, is_binary)
 
     def updates(self):
         payloads = copy.copy(MMClient.updates)
