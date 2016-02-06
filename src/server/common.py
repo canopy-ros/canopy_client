@@ -1,7 +1,6 @@
 
 clients = dict()
 
-
 def get_client(name):
     return clients[name]
 
