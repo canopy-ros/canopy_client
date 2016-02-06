@@ -15,10 +15,10 @@ class MMServerProtocol(WebSocketServerProtocol):
         self.lat_pubs = dict()
 
     def onConnect(self, request):
-        name = request.path[0:]
+        name = request.path[1:]
         common.add_client(name, self)
         self.name_of_client = name
-        self.lat_pubs[name[1:]] = rospy.Publisher("/jammi" + name + "/latency", Float32, queue_size=2)
+        self.lat_pubs[name] = rospy.Publisher("/jammi/" + name + "/latency", Float32, queue_size=2)
 
     def onMessage(self, payload, is_binary):
         if is_binary:
@@ -32,13 +32,12 @@ class MMServerProtocol(WebSocketServerProtocol):
                 latency = Float32()
                 latency.data = received_time - msg["stamp"]
                 self.lat_pubs[msg["from"]].publish(latency)
-                if msg["to"] == "*":
+                if msg["to"][0] == "*":
                     for name in common.clients.keys():
                         if name != msg["from"]:
                             common.get_client(name).sendMessage(payload, True)
                 else:
-                    recipients = msg["to"].split(' ')
-                    for name in recipients:
+                    for name in msg["to"]:
                         common.get_client(name).sendMessage(payload, True)
             except KeyError:
                 pass

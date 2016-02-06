@@ -41,7 +41,7 @@ class JammiNode(object):
     def create_callback(self, topic, msg_type, trusted):
         def callback(msg):
             data = dict()
-            data["to"] = trusted
+            data["to"] = trusted.split(' ')
             data["from"] = self.name
             data["topic"] = "/{}{}".format(self.name, topic)
             data["type"] = msg_type

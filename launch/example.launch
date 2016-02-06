@@ -9,14 +9,6 @@
         <param name="name" value="foo"/>
         <param name="host" value="localhost"/>
         <param name="port" value="9000"/>
-        <rosparam>
-            publishing: 
-                - /state
-            types:
-                - geometry_msgs/Point
-            trusted:
-                - /bar /baz
-        </rosparam>
     </node>
 
     <node pkg="jammi" type="client_node.py" name="bar_client_node" output="screen">
@@ -38,14 +30,19 @@
         <rosparam>
             publishing:
                 - /state
+                - /filtered_state
             types:
                 - geometry_msgs/Point
+                - geometry_msgs/Point
             trusted:
-                - /foo
+                - foo bar baz
+                - foo bar
         </rosparam>
 
     </node>
 
     <node pkg="rostopic" type="rostopic" name="state_pub"
         args="pub -r 100 /state geometry_msgs/Point '{x: 1, y: 1, z: 0}'"/>
+    <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
+        args="pub -r 100 /filtered_state geometry_msgs/Point '{x: 2, y: 1, z: 1}'" />
 </launch>
