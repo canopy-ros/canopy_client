@@ -1,12 +1,12 @@
 
-# import zlib
+import zlib
 import threading
 import json
 import copy
 from twisted.internet import reactor
 from autobahn.twisted.websocket import WebSocketClientProtocol
 from autobahn.twisted.websocket import WebSocketClientFactory
-
+from struct import *
 
 class MMClient(WebSocketClientProtocol):
 
@@ -19,6 +19,13 @@ class MMClient(WebSocketClientProtocol):
     def onMessage(self, payload, is_binary):
         if not is_binary:
             data = json.loads(payload)
+            MMClient.updates[data["topic"]] = data
+        else:
+            decompressed = zlib.decompress(payload)
+            size = unpack('=I', decompressed[:4])
+            frmt = "%ds" % size[0]
+            unpacked = unpack('=I' + frmt, decompressed)
+            data = json.loads(unpacked[1])
             MMClient.updates[data["topic"]] = data
 
     @staticmethod
@@ -47,8 +54,13 @@ class Connection(threading.Thread):
 
     def send_message(self, data):
         payload = json.dumps(data)
-        is_binary = False
-        return MMClient.send_message(payload, is_binary)
+        frmt = "%ds" % len(payload)
+        binary = pack(frmt, payload)
+        binLen = len(binary)
+        binary = pack('=I' + frmt, binLen, payload)
+        compressed = zlib.compress(binary)
+	is_binary = True
+        return MMClient.send_message(compressed, is_binary)
 
     def updates(self):
         payloads = copy.copy(MMClient.updates)

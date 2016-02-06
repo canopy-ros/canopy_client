@@ -12,7 +12,7 @@ NODE_NAME = "jammi_server"
 
 
 def run_server(host, port):
-    log.startLogging(sys.stdout)
+    #log.startLogging(sys.stdout)
     url = "ws://{}:{}".format(host, port)
     factory = WebSocketServerFactory(url, debug=True)
     factory.protocol = ws.MMServerProtocol

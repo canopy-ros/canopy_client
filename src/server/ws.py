@@ -1,12 +1,12 @@
 
-# import zlib
+import zlib
 import json
 import rospy
 import time
 import common
 from std_msgs.msg import Float32
 from autobahn.twisted.websocket import WebSocketServerProtocol
-
+from struct import *
 
 class MMServerProtocol(WebSocketServerProtocol):
 
@@ -31,6 +31,27 @@ class MMServerProtocol(WebSocketServerProtocol):
                     common.get_client(msg["to"]).sendMessage(payload)
             except KeyError:
                 pass
+        else:
+            try:
+                receivedTime = time.time()
+                decompressed = zlib.decompress(payload)
+                size = unpack('=I', decompressed[:4])
+                frmt = "%ds" % size[0]
+                unpacked = unpack('=I' + frmt, decompressed)
+                msg = json.loads(unpacked[1])
+                latency = Float32()
+                latency.data = receivedTime - msg["stamp"]
+                self.lat_pub.publish(latency)
+                if msg["to"] == "*":
+                    for name in common.clients.keys():
+                        if name != msg["from"]:
+                            common.get_client(name).sendMessage(payload, True)
+                else:
+                    common.get_client(msg["to"]).sendMessage(payload, True)
+            except KeyError:
+                pass
+
+	
 
     def onClose(self, was_clean, code, reason):
         common.remove_client(self.name_of_client)
