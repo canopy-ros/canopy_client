@@ -10,10 +10,12 @@
         <param name="host" value="localhost"/>
         <param name="port" value="9000"/>
         <rosparam>
-            publishing:
+            publishing: 
                 - /state
             types:
                 - geometry_msgs/Point
+            trusted:
+                - /bar /baz
         </rosparam>
     </node>
 
@@ -21,12 +23,27 @@
         <param name="name" value="bar"/>
         <param name="host" value="localhost"/>
         <param name="port" value="9000"/>
+    </node>
+
+    <node pkg="jammi" type="client_node.py" name="baz_client_node" output="screen">
+        <param name="name" value="baz"/>
+        <param name="host" value="localhost"/>
+        <param name="port" value="9000"/>
+    </node>
+
+    <node pkg="jammi" type="client_node.py" name="qux_client_node" output="screen">
+        <param name="name" value="qux"/>
+        <param name="host" value="localhost"/>
+        <param name="port" value="9000"/>
         <rosparam>
             publishing:
                 - /state
             types:
                 - geometry_msgs/Point
+            trusted:
+                - /foo
         </rosparam>
+
     </node>
 
     <node pkg="rostopic" type="rostopic" name="state_pub"

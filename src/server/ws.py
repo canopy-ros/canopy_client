@@ -12,7 +12,7 @@ from autobahn.twisted.websocket import WebSocketServerProtocol
 class MMServerProtocol(WebSocketServerProtocol):
 
     def onConnect(self, request):
-        name = request.path[1:]
+        name = request.path[0:]
         common.add_client(name, self)
         self.name_of_client = name
         self.lat_pub = rospy.Publisher("/jammi/latency", Float32, queue_size=2)
@@ -34,7 +34,9 @@ class MMServerProtocol(WebSocketServerProtocol):
                         if name != msg["from"]:
                             common.get_client(name).sendMessage(payload, True)
                 else:
-                    common.get_client(msg["to"]).sendMessage(payload, True)
+                    recipients = msg["to"].split(' ')
+                    for name in recipients:
+                        common.get_client(name).sendMessage(payload, True)
             except KeyError:
                 pass
 
