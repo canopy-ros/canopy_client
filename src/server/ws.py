@@ -1,9 +1,10 @@
 
-# import zlib
+import zlib
 import json
 import rospy
 import time
 import common
+import struct
 from std_msgs.msg import Float32
 from autobahn.twisted.websocket import WebSocketServerProtocol
 
@@ -17,18 +18,23 @@ class MMServerProtocol(WebSocketServerProtocol):
         self.lat_pub = rospy.Publisher("/jammi/latency", Float32, queue_size=2)
 
     def onMessage(self, payload, is_binary):
-        if not is_binary:
+        if is_binary:
             try:
-                msg = json.loads(payload)
+                received_time = time.time()
+                decompressed = zlib.decompress(payload)
+                size = struct.unpack('=I', decompressed[:4])
+                frmt = "%ds" % size[0]
+                unpacked = struct.unpack('=I' + frmt, decompressed)
+                msg = json.loads(unpacked[1])
                 latency = Float32()
-                latency.data = time.time() - msg["stamp"]
+                latency.data = received_time - msg["stamp"]
                 self.lat_pub.publish(latency)
                 if msg["to"] == "*":
                     for name in common.clients.keys():
                         if name != msg["from"]:
-                            common.get_client(name).sendMessage(payload)
+                            common.get_client(name).sendMessage(payload, True)
                 else:
-                    common.get_client(msg["to"]).sendMessage(payload)
+                    common.get_client(msg["to"]).sendMessage(payload, True)
             except KeyError:
                 pass
 
