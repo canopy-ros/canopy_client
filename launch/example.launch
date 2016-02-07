@@ -1,32 +1,27 @@
 <?xml version="1.0"?>
 <launch>
-    <node pkg="jammi" type="server_node.py" name="jammi_server" output="screen">
-        <param name="host" value="localhost"/>
-        <param name="port" value="9000"/>
-    </node>
-
     <node pkg="jammi" type="client_node.py" name="foo_client_node" output="screen">
         <param name="name" value="foo"/>
-        <param name="host" value="localhost"/>
-        <param name="port" value="9000"/>
+        <param name="host" value="wallar.me"/>
+        <param name="port" value="8080"/>
     </node>
 
     <node pkg="jammi" type="client_node.py" name="bar_client_node" output="screen">
         <param name="name" value="bar"/>
-        <param name="host" value="localhost"/>
-        <param name="port" value="9000"/>
+        <param name="host" value="wallar.me"/>
+        <param name="port" value="8080"/>
     </node>
 
     <node pkg="jammi" type="client_node.py" name="baz_client_node" output="screen">
         <param name="name" value="baz"/>
-        <param name="host" value="localhost"/>
-        <param name="port" value="9000"/>
+        <param name="host" value="wallar.me"/>
+        <param name="port" value="8080"/>
     </node>
 
     <node pkg="jammi" type="client_node.py" name="qux_client_node" output="screen">
         <param name="name" value="qux"/>
-        <param name="host" value="localhost"/>
-        <param name="port" value="9000"/>
+        <param name="host" value="wallar.me"/>
+        <param name="port" value="8080"/>
         <rosparam>
             publishing:
                 - /state
@@ -35,7 +30,7 @@
                 - geometry_msgs/Point
                 - geometry_msgs/Point
             trusted:
-                - foo bar baz
+                - "*"
                 - foo bar
         </rosparam>
 

@@ -35,7 +35,7 @@ class JammiNode(object):
         mod = __import__(namespace + ".msg")
         msg_cls = getattr(mod.msg, msg_name)
         cb = self.create_callback(topic, msg_type, trusted)
-        self.subs[topic] = rospy.Subscriber(topic, msg_cls, cb)
+        self.subs[topic] = rospy.Subscriber(topic, msg_cls, cb, None, 1)
         return self
 
     def create_callback(self, topic, msg_type, trusted):
