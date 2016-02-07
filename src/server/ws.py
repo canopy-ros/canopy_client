@@ -29,6 +29,8 @@ class MMServerProtocol(WebSocketServerProtocol):
                 frmt = "%ds" % size[0]
                 unpacked = struct.unpack('=I' + frmt, decompressed)
                 msg = json.loads(unpacked[1])
+                acknowledge = struct.pack('=b', 0)
+                common.get_client(msg["from"]).sendMessage(acknowledge, True)
                 latency = Float32()
                 latency.data = received_time - msg["stamp"]
                 self.lat_pubs[msg["from"]].publish(latency)

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
     <node pkg="jammi" type="server_node.py" name="jammi_server" output="screen">
-        <param name="host" value="localhost"/>
-        <param name="port" value="9000"/>
+        <param name="host" value="wallar.me"/>
+        <param name="port" value="8080"/>
     </node>
 
 </launch>
