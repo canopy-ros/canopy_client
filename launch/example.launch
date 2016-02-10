@@ -10,7 +10,7 @@
         <param name="host" value="localhost"/>
         <param name="port" value="9000"/>
         <rosparam>
-            publishing: 
+            publishing:
                 - /state
             types:
                 - geometry_msgs/Point

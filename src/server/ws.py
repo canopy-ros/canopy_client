@@ -18,7 +18,9 @@ class MMServerProtocol(WebSocketServerProtocol):
         name = request.path[0:]
         common.add_client(name, self)
         self.name_of_client = name
-        self.lat_pubs[name[1:]] = rospy.Publisher("/jammi" + name + "/latency", Float32, queue_size=2)
+        topic_name = "/jammi{}/latency".format(name)
+        self.lat_pubs[name[1:]] = rospy.Publisher(topic_name, Float32,
+                                                  queue_size=2)
 
     def onMessage(self, payload, is_binary):
         if is_binary:
