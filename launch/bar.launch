@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <node pkg="jammi" type="client_node.py" name="bar_client_node" output="screen">
+        <param name="name" value="bar"/>
+        <param name="host" value="localhost"/>
+        <param name="port" value="9000"/>
+    </node>
+
+</launch>
