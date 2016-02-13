@@ -5,10 +5,12 @@ import json
 import copy
 import struct
 import rospy
+import time
 import tornado.web
 import tornado.websocket
 import tornado.httpserver
 import tornado.ioloop
+from std_msgs.msg import Float32
 
 class Connection(threading.Thread):
     def __init__(self, host, port, name):
@@ -22,6 +24,7 @@ class Connection(threading.Thread):
         self.values = dict()
         self.acknowledged = True
         self.timer = threading.Timer
+        self.freqPub = rospy.Publisher("/{}/ping".format(name), Float32, queue_size=0)
 
     def run(self):
         tornado.websocket.websocket_connect(
@@ -45,6 +48,8 @@ class Connection(threading.Thread):
             # rospy.loginfo(self.acknowledged)
             if self.acknowledged:
                 self.acknowledged = False
+                if binLen > 1000:
+                    self.freqPub.publish(0.0)
                 self.connection.write_message(compressed, True)
                 self.timer = threading.Timer(1, self.timeout)
                 self.timer.start()
