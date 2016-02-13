@@ -4,66 +4,11 @@ import threading
 import json
 import copy
 import struct
-from twisted.internet import reactor
-from twisted.internet.protocol import ReconnectingClientFactory
-from autobahn.twisted.websocket import WebSocketClientProtocol
-from autobahn.twisted.websocket import WebSocketClientFactory
 import rospy
-
-
-class MMClient(WebSocketClientProtocol):
-
-    client = None
-    updates = dict()
-    acknowledged = True
-    timer = threading.Timer
-
-    def onConnect(self, reponse):
-        MMClient.client = self
-        MMClient.acknowledged = True
-        MMClient.timer = threading.Timer
-
-    def onMessage(self, payload, is_binary):
-        if not is_binary:
-            data = json.loads(payload)
-            MMClient.updates[data["topic"]] = data
-        else:
-            if len(payload) == 1:
-                MMClient.acknowledged = True
-                MMClient.timer.cancel()
-            else:
-                decompressed = zlib.decompress(payload)
-                size = struct.unpack('=I', decompressed[:4])
-                frmt = "%ds" % size[0]
-                unpacked = struct.unpack('=I' + frmt, decompressed)
-                data = json.loads(unpacked[1])
-                MMClient.updates[data["topic"]] = data
-
-    def onClose(self, wasClean, code, reason):
-        rospy.logwarn("WebSocket connection closed: {0}".format(reason))
-
-    @staticmethod
-    def timeout():
-        MMClient.acknowledged = True
-
-    @staticmethod
-    def send_message(payload, is_binary):
-        if not MMClient.client is None:
-            # rospy.loginfo(MMClient.acknowledged)
-            if MMClient.acknowledged:
-                MMClient.acknowledged = False
-                MMClient.client.sendMessage(payload, is_binary)
-                MMClient.timer = threading.Timer(1, MMClient.timeout)
-                MMClient.timer.start()
-
-
-class ClientFactory(WebSocketClientFactory, ReconnectingClientFactory):
-    def clientConnectionFailed(self, connector, reason):
-        print "Connection Failed {} -- {}".format(connector, reason)
-
-    def clientConnectionLost(self, connector, reason):
-        print "Connection Failed {} -- {}".format(connector, reason)
-
+import tornado.web
+import tornado.websocket
+import tornado.httpserver
+import tornado.ioloop
 
 class Connection(threading.Thread):
     def __init__(self, host, port, name):
@@ -72,27 +17,70 @@ class Connection(threading.Thread):
         self.port = port
         self.name = name
         self.url = "ws://{}:{}/{}".format(host, port, name)
-        self.factory = ClientFactory(self.url, debug=False)
-        self.daemon = True
+        self.ioloop = tornado.ioloop.IOLoop.current()
+        self.connection = None
+        self.values = dict()
+        self.acknowledged = True
+        self.timer = threading.Timer
 
     def run(self):
-        self.factory.protocol = MMClient
-        reactor.connectTCP(self.host, self.port, self.factory)
-        reactor.run(installSignalHandlers=0)
+        tornado.websocket.websocket_connect(
+            self.url,
+            self.ioloop,
+            callback = self.on_connected,
+            on_message_callback = self.on_message)
+        self.ioloop.start()
 
     def stop(self):
-        reactor.stop()
+        self.ioloop.stop()
 
-    def send_message(self, data):
+    def send_message_cb(self, data):
         payload = json.dumps(data)
         frmt = "%ds" % len(payload)
         binary = struct.pack(frmt, payload)
         binLen = len(binary)
         binary = struct.pack('=I' + frmt, binLen, payload)
         compressed = zlib.compress(binary)
-        return MMClient.send_message(compressed, True)
+        if not self.connection is None:
+            # rospy.loginfo(self.acknowledged)
+            if self.acknowledged:
+                self.acknowledged = False
+                self.connection.write_message(compressed, True)
+                self.timer = threading.Timer(1, self.timeout)
+                self.timer.start()
+    
+    def send_message(self, data):
+        self.ioloop.add_callback(self.send_message_cb, data)
 
     def updates(self):
-        payloads = copy.copy(MMClient.updates)
-        MMClient.updates = dict()
+        payloads = copy.copy(self.values)
+        self.values = dict()
         return payloads
+
+    def on_connected(self, res):
+        try:
+            self.connection = res.result()
+        except Exception, e:
+            print "Failed to connect: {}".format(e)
+            tornado.websocket.websocket_connect(
+            self.url,
+            self.ioloop,
+            callback = self.on_connected,
+            on_message_callback = self.on_message)
+
+
+    def on_message(self, payload):
+        if len(payload) == 1:
+            self.acknowledged = True
+            self.timer.cancel()
+        else:
+            decompressed = zlib.decompress(payload)
+            size = struct.unpack('=I', decompressed[:4])
+            frmt = "%ds" % size[0]
+            unpacked = struct.unpack('=I' + frmt, decompressed)
+            data = json.loads(unpacked[1])
+            self.values[data["topic"]] = data
+
+    def timeout(self):
+        self.acknowledged = True
+

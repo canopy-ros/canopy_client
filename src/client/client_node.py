@@ -29,6 +29,7 @@ class JammiNode(object):
             updates = self.conn.updates()
             for v in updates.values():
                 self.pub_man.publish(v)
+        self.conn.stop()
 
     def create_subscriber(self, topic, msg_type, trusted):
         namespace, msg_name = msg_type.split("/")

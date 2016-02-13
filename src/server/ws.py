@@ -6,44 +6,42 @@ import time
 import common
 import struct
 from std_msgs.msg import Float32
-from autobahn.twisted.websocket import WebSocketServerProtocol
+import tornado.web
+import tornado.websocket
+import tornado.httpserver
+import tornado.ioloop
 
 
-class MMServerProtocol(WebSocketServerProtocol):
+class MMServerProtocol(tornado.websocket.WebSocketHandler):
+    lat_pubs = dict()
 
-    def __init__(self):
-        self.lat_pubs = dict()
-
-    def onConnect(self, request):
-        name = request.path[1:]
+    def open(self, name):
         common.add_client(name, self)
         self.name_of_client = name
-        self.lat_pubs[name] = rospy.Publisher("/jammi/" + name + "/latency",
-                                              Float32, queue_size=2)
+        MMServerProtocol.lat_pubs[name] = rospy.Publisher("/jammi/" + name
+                                      + "/latency", Float32, queue_size=2)
+        print "Connected to: {}".format(name)
 
-    def onMessage(self, payload, is_binary):
-        if is_binary:
-            try:
-                received_time = time.time()
-                decompressed = zlib.decompress(payload)
-                size = struct.unpack('=I', decompressed[:4])
-                frmt = "%ds" % size[0]
-                unpacked = struct.unpack('=I' + frmt, decompressed)
-                msg = json.loads(unpacked[1])
-                acknowledge = struct.pack('=b', 0)
-                common.get_client(msg["from"]).sendMessage(acknowledge, True)
-                latency = Float32()
-                latency.data = received_time - msg["stamp"]
-                self.lat_pubs[msg["from"]].publish(latency)
-                if msg["to"][0] == "*":
-                    for name in common.clients.keys():
-                        if name != msg["from"]:
-                            common.get_client(name).sendMessage(payload, True)
-                else:
-                    for name in msg["to"]:
-                        common.get_client(name).sendMessage(payload, True)
-            except KeyError:
-                pass
 
-    def onClose(self, was_clean, code, reason):
+    def on_message(self, message):
+        received_time = time.time()
+        decompressed = zlib.decompress(message)
+        size = struct.unpack('=I', decompressed[:4])
+        frmt = "%ds" % size[0]
+        unpacked = struct.unpack('=I' + frmt, decompressed)
+        msg = json.loads(unpacked[1])
+        acknowledge = struct.pack('=b', 0)
+        self.write_message(acknowledge, True)
+        latency = Float32()
+        latency.data = received_time - msg["stamp"]
+        MMServerProtocol.lat_pubs[msg["from"]].publish(latency)
+        if msg["to"][0] == "*":
+            for name in common.clients.keys():
+                if name != msg["from"]:
+                    common.get_client(name).write_message(message, True)
+        else:
+            for name in msg["to"]:
+                common.get_client(name).write_message(message, True)
+
+    def on_close(self):
         common.remove_client(self.name_of_client)
