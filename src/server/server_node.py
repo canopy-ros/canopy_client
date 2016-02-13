@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import ws
+import connection
 import rospy
 import signal
 import tornado.web
@@ -13,7 +13,7 @@ NODE_NAME = "jammi_server"
 
 settings = {'debug': True}
 app = tornado.web.Application([
-    (r'/(.*)', ws.MMServerProtocol),
+    (r'/(.*)', connection.MMServerProtocol),
     ], **settings)
 
 def sig_handler(sig, frame):
