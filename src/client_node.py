@@ -7,7 +7,7 @@ from rospy_message_converter import message_converter as mc
 from connection import Connection
 
 
-NODE_NAME = "jammi_client"
+NODE_NAME = "roscloud_client"
 
 
 class JammiNode(object):

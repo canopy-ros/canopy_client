@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(jammi)
+project(roscloud)
 
 find_package(catkin REQUIRED COMPONENTS
   rospy
@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES jammi
+#  LIBRARIES roscloud
 #  CATKIN_DEPENDS rospy std_msgs
 #  DEPENDS system_lib
 )
