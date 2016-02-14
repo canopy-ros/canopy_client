@@ -10,7 +10,7 @@ from connection import Connection
 NODE_NAME = "roscloud_client"
 
 
-class JammiNode(object):
+class ROSCloudNode(object):
 
     def __init__(self, host, port, name, broadcasting):
         self.host = host
@@ -61,5 +61,5 @@ if __name__ == "__main__":
     host = rospy.get_param("~host")
     port = rospy.get_param("~port")
     broadcasting = zip(topics, types, trusted)
-    jn = JammiNode(host, port, name, broadcasting)
-    jn.run()
+    rcn = ROSCloudNode(host, port, name, broadcasting)
+    rcn.run()
