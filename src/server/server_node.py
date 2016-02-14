@@ -11,22 +11,23 @@ import tornado.ioloop
 
 NODE_NAME = "jammi_server"
 
-settings = {'debug': True}
+settings = {'debug': False}
 app = tornado.web.Application([
     (r'/(.*)', connection.MMServerProtocol),
     ], **settings)
 
 def sig_handler(sig, frame):
-    tornado.ioloop.IOLoop.instance().add_callback(shutdown)
+    tornado.ioloop.IOLoop.current().add_callback(shutdown)
 
 def shutdown():
-    tornado.ioloop.IOLoop.instance().stop()
+    tornado.ioloop.IOLoop.current().stop()
 
 def run_server(host, port):
     url = "ws://{}:{}".format(host, port)
     http_server = tornado.httpserver.HTTPServer(app)
-    http_server.listen(port)
-    tornado.ioloop.IOLoop.instance().start()
+    http_server.bind(port)
+    http_server.start(0)
+    tornado.ioloop.IOLoop.current().start()
 
 if __name__ == "__main__":
     rospy.init_node(NODE_NAME, anonymous=False)
