@@ -13,13 +13,14 @@ import tornado.ioloop
 from std_msgs.msg import Float32
 
 class Connection(threading.Thread):
+
     def __init__(self, host, port, name):
         super(Connection, self).__init__()
         self.host = host
         self.port = port
         self.name = name
         self.url = "ws://{}:{}/{}".format(host, port, name)
-        self.ioloop = tornado.ioloop.IOLoop.current()
+        self.ioloop = None
         self.connection = None
         self.values = dict()
         self.acknowledged = True
@@ -27,6 +28,8 @@ class Connection(threading.Thread):
         self.freqPub = rospy.Publisher("/{}/ping".format(name), Float32, queue_size=0)
 
     def run(self):
+        while self.ioloop is None:
+            self.ioloop = tornado.ioloop.IOLoop()
         tornado.websocket.websocket_connect(
             self.url,
             self.ioloop,
@@ -34,8 +37,11 @@ class Connection(threading.Thread):
             on_message_callback = self.on_message)
         self.ioloop.start()
 
-    def stop(self):
+    def shutdown(self):
         self.ioloop.stop()
+
+    def stop(self):
+        self.ioloop.add_callback(self.shutdown)
 
     def send_message_cb(self, data):
         payload = json.dumps(data)
@@ -45,7 +51,6 @@ class Connection(threading.Thread):
         binary = struct.pack('=I' + frmt, binLen, payload)
         compressed = zlib.compress(binary)
         if not self.connection is None:
-            # rospy.loginfo(self.acknowledged)
             if self.acknowledged:
                 self.acknowledged = False
                 if binLen > 1000:
@@ -65,6 +70,12 @@ class Connection(threading.Thread):
     def on_connected(self, res):
         try:
             self.connection = res.result()
+            while self.connection is None:
+                tornado.websocket.websocket_connect(
+                    self.url,
+                    self.ioloop,
+                    callback = self.on_connected,
+                    on_message_callback = self.on_message)
         except Exception, e:
             print "Failed to connect: {}".format(e)
             tornado.websocket.websocket_connect(
@@ -84,7 +95,7 @@ class Connection(threading.Thread):
             frmt = "%ds" % size[0]
             unpacked = struct.unpack('=I' + frmt, decompressed)
             data = json.loads(unpacked[1])
-            self.values[data["topic"]] = data
+            self.values[data["Topic"]] = data
 
     def timeout(self):
         self.acknowledged = True

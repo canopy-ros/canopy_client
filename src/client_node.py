@@ -16,8 +16,8 @@ class ROSCloudNode(object):
         self.host = host
         self.port = port
         self.name = name
-        self.conn = Connection(host, port, name)
-        self.conn.start()
+        self.conn = dict()
+        self.receiver = None
         self.subs = dict()
         self.broadcasting = broadcasting
         self.pub_man = pm.PublisherManager()
@@ -25,11 +25,25 @@ class ROSCloudNode(object):
     def run(self):
         for topic, msg_type, trusted in self.broadcasting:
             self.create_subscriber(topic, msg_type, trusted)
+            if topic == "/receiving":
+                rospy.logerror("{}: topic name 'receiving' is reserved".format(
+                    self.name))
+                continue
+            self.conn[topic] = Connection(host, port, "{}{}".format(
+                self.name, topic))
+            self.conn[topic].start()
+        self.receiver = Connection(host, port, "{}{}".format(
+            self.name, "/receiving"))
+        self.receiver.start()
         while not rospy.is_shutdown():
-            updates = self.conn.updates()
+            #for key, conn in self.conn.iteritems():
+            #    updates = conn.updates()
+            updates = self.receiver.updates()
             for v in updates.values():
                 self.pub_man.publish(v)
-        self.conn.stop()
+        for key, conn in self.conn.iteritems():
+            conn.stop()
+	self.receiver.stop()
 
     def create_subscriber(self, topic, msg_type, trusted):
         namespace, msg_name = msg_type.split("/")
@@ -42,13 +56,13 @@ class ROSCloudNode(object):
     def create_callback(self, topic, msg_type, trusted):
         def callback(msg):
             data = dict()
-            data["to"] = trusted.split(' ')
-            data["from"] = self.name
-            data["topic"] = "/{}{}".format(self.name, topic)
-            data["type"] = msg_type
-            data["stamp"] = time.time()
-            data["msg"] = mc.convert_ros_message_to_dictionary(msg)
-            self.conn.send_message(data)
+            data["To"] = trusted.split(' ')
+            data["From"] = self.name
+            data["Topic"] = "/{}{}".format(self.name, topic)
+            data["Type"] = msg_type
+            data["Stamp"] = time.time()
+            data["Msg"] = mc.convert_ros_message_to_dictionary(msg)
+            self.conn[topic].send_message(data)
         return callback
 
 
