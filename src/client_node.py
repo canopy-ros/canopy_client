@@ -12,7 +12,7 @@ NODE_NAME = "roscloud_client"
 
 class ROSCloudNode(object):
 
-    def __init__(self, host, port, name, broadcasting):
+    def __init__(self, host, port, name, broadcasting, private_key):
         self.host = host
         self.port = port
         self.name = name
@@ -20,6 +20,7 @@ class ROSCloudNode(object):
         self.receiver = None
         self.subs = dict()
         self.broadcasting = broadcasting
+        self.private_key = private_key
         self.pub_man = pm.PublisherManager()
 
     def run(self):
@@ -30,10 +31,10 @@ class ROSCloudNode(object):
                     self.name))
                 continue
             self.conn[topic] = Connection(host, port, "{}{}".format(
-                self.name, topic))
+                self.name, topic), private_key)
             self.conn[topic].start()
         self.receiver = Connection(host, port, "{}{}".format(
-            self.name, "/receiving"))
+            self.name, "/receiving"), private_key)
         self.receiver.start()
         while not rospy.is_shutdown():
             #for key, conn in self.conn.iteritems():
@@ -61,6 +62,7 @@ class ROSCloudNode(object):
             data["Topic"] = "/{}{}".format(self.name, topic)
             data["Type"] = msg_type
             data["Stamp"] = time.time()
+            data["Private_key"] = self.private_key
             data["Msg"] = mc.convert_ros_message_to_dictionary(msg)
             self.conn[topic].send_message(data)
         return callback
@@ -74,6 +76,7 @@ if __name__ == "__main__":
     trusted = rospy.get_param("~trusted", [])
     host = rospy.get_param("~host")
     port = rospy.get_param("~port")
+    private_key = rospy.get_param("~private_key")
     broadcasting = zip(topics, types, trusted)
-    rcn = ROSCloudNode(host, port, name, broadcasting)
+    rcn = ROSCloudNode(host, port, name, broadcasting, private_key)
     rcn.run()

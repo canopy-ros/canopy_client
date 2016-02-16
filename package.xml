@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package>
-  <name>roscloud</name>
+  <name>roscloud_client</name>
   <version>0.0.1</version>
   <description>ROS Cloud Robotics Framework</description>
   <maintainer email="wallar@mit.edu">Alex Wallar</maintainer>

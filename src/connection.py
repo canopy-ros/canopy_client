@@ -14,12 +14,12 @@ from std_msgs.msg import Float32
 
 class Connection(threading.Thread):
 
-    def __init__(self, host, port, name):
+    def __init__(self, host, port, name, private_key):
         super(Connection, self).__init__()
         self.host = host
         self.port = port
         self.name = name
-        self.url = "ws://{}:{}/{}".format(host, port, name)
+        self.url = "ws://{}:{}/{}/{}".format(host, port, private_key, name)
         self.ioloop = None
         self.connection = None
         self.values = dict()
@@ -60,7 +60,8 @@ class Connection(threading.Thread):
                 self.timer.start()
     
     def send_message(self, data):
-        self.ioloop.add_callback(self.send_message_cb, data)
+	if not self.ioloop is None:
+        	self.ioloop.add_callback(self.send_message_cb, data)
 
     def updates(self):
         payloads = copy.copy(self.values)
@@ -88,7 +89,10 @@ class Connection(threading.Thread):
     def on_message(self, payload):
         if len(payload) == 1:
             self.acknowledged = True
-            self.timer.cancel()
+            try:
+                self.timer.cancel()
+            except:
+                pass
         else:
             decompressed = zlib.decompress(payload)
             size = struct.unpack('=I', decompressed[:4])
