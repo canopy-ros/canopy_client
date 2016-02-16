@@ -5,6 +5,7 @@ import time
 import publishermanager as pm
 from rospy_message_converter import message_converter as mc
 from connection import Connection
+import threading
 
 
 NODE_NAME = "roscloud_client"
@@ -12,16 +13,19 @@ NODE_NAME = "roscloud_client"
 
 class ROSCloudNode(object):
 
-    def __init__(self, host, port, name, broadcasting, private_key):
+    def __init__(self, host, port, name, broadcasting, private_key, description):
         self.host = host
         self.port = port
         self.name = name
         self.conn = dict()
         self.receiver = None
+        self.descriptionConn = None
         self.subs = dict()
         self.broadcasting = broadcasting
         self.private_key = private_key
+        self.description = description
         self.pub_man = pm.PublisherManager()
+        self.timer = threading.Timer(0.1, self.descriptionSend)
 
     def run(self):
         for topic, msg_type, trusted in self.broadcasting:
@@ -35,7 +39,11 @@ class ROSCloudNode(object):
             self.conn[topic].start()
         self.receiver = Connection(host, port, "{}{}".format(
             self.name, "/receiving"), private_key)
+        self.descriptionConn = Connection(host, port, "{}/description".format(
+            self.name), private_key)
         self.receiver.start()
+        self.descriptionConn.start()
+        self.timer.start()
         while not rospy.is_shutdown():
             #for key, conn in self.conn.iteritems():
             #    updates = conn.updates()
@@ -45,6 +53,8 @@ class ROSCloudNode(object):
         for key, conn in self.conn.iteritems():
             conn.stop()
 	self.receiver.stop()
+        self.timer.cancel()
+        self.descriptionConn.stop()
 
     def create_subscriber(self, topic, msg_type, trusted):
         namespace, msg_name = msg_type.split("/")
@@ -67,6 +77,20 @@ class ROSCloudNode(object):
             self.conn[topic].send_message(data)
         return callback
 
+    def descriptionSend(self):
+        data = dict()
+        data["To"] = ["*"]
+        data["From"] = self.name
+        data["Topic"] = "/{}/description".format(self.name)
+        data["Type"] = "std_msgs/String"
+        data["Stamp"] = time.time()
+        data["Private_key"] = self.private_key
+        msg = dict()
+        msg["data"] = self.description
+        data["Msg"] = msg
+        self.descriptionConn.send_message(data)
+        self.timer = threading.Timer(0.1, self.descriptionSend)
+        self.timer.start()
 
 if __name__ == "__main__":
     rospy.init_node(NODE_NAME, anonymous=False)
@@ -77,6 +101,8 @@ if __name__ == "__main__":
     host = rospy.get_param("~host")
     port = rospy.get_param("~port")
     private_key = rospy.get_param("~private_key")
+    description = rospy.get_param("~description")
     broadcasting = zip(topics, types, trusted)
-    rcn = ROSCloudNode(host, port, name, broadcasting, private_key)
+    rcn = ROSCloudNode(host, port, name, broadcasting, private_key,
+        description)
     rcn.run()

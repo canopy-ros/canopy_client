@@ -5,6 +5,7 @@
         <param name="host" value="wallar.me"/>
         <param name="port" value="8080"/>
         <param name="private_key" value="MIICXAIBAAKBgQCTUQ49FJUCVvU5tIag" />
+        <param name="description" value="foo robot" />
     </node>
 
     <node pkg="roscloud_client" type="client_node.py" name="bar_client_node" output="screen">
@@ -12,6 +13,7 @@
         <param name="host" value="wallar.me"/>
         <param name="port" value="8080"/>
         <param name="private_key" value="MIICXAIBAAKBgQCTUQ49FJUCVvU5tIag" />
+        <param name="description" value="bar robot" />
     </node>
 
     <node pkg="roscloud_client" type="client_node.py" name="baz_client_node" output="screen">
@@ -19,6 +21,7 @@
         <param name="host" value="wallar.me"/>
         <param name="port" value="8080"/>
         <param name="private_key" value="MIICXAIBAAKBgQCTUQ49FJUCVvU5tIag" />
+        <param name="description" value="baz robot" />
     </node>
 
     <node pkg="roscloud_client" type="client_node.py" name="qux_client_node" output="screen">
@@ -26,19 +29,23 @@
         <param name="host" value="wallar.me"/>
         <param name="port" value="8080"/>
         <param name="private_key" value="MIICXAIBAAKBgQCTUQ49FJUCVvU5tIag" />
+        <param name="description" value="qux robot" />
         <rosparam>
             publishing:
                 - /state
                 - /filtered_state
                 - /usb_cam/image_raw/compressed
+                - /test_string
             types:
                 - geometry_msgs/Point
                 - geometry_msgs/Point
                 - sensor_msgs/CompressedImage
+                - std_msgs/String
             trusted:
                 - "*"
                 - foo bar
                 - foo
+                - "*"
         </rosparam>
 
     </node>
@@ -47,10 +54,12 @@
         args="pub -r 100 /state geometry_msgs/Point '{x: 1, y: 1, z: 0}'"/>
     <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
         args="pub -r 100 /filtered_state geometry_msgs/Point '{x: 2, y: 1, z: 1}'" />
+    <node pkg="rostopic" type="rostopic" name="string_pub"
+        args="pub -r 100 /test_string std_msgs/String 'test'" />
     <node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
         <param name="video_device" value="/dev/video0" />
-        <param name="image_width" value="320" />
-        <param name="image_height" value="240" />
+        <param name="image_width" value="640" />
+        <param name="image_height" value="480" />
         <param name="pixel_format" value="yuyv" />
         <param name="camera_frame_id" value="usb_cam" />
         <param name="io_method" value="mmap"/>
