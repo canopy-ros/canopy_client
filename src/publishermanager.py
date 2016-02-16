@@ -1,13 +1,15 @@
+# Defines PublisherManager class.
 
 import rospy
 from rospy_message_converter import message_converter
 
-
+# Manages ROS publishers for received messages.
 class PublisherManager(object):
 
     def __init__(self):
         self.pubs = dict()
 
+    # Converts message dictionary to ROS message for publishing.
     def create_msg(self, msg_dict, msg_type):
         namespace, msg_name = msg_type.split("/")
         mod = __import__(namespace + ".msg")
@@ -16,6 +18,8 @@ class PublisherManager(object):
             msg_type, msg_dict)
         return msg, msg_cls
 
+    # Publishes newly received messages.
+    # Creates new Publishers for new topics.
     def publish(self, data):
         msg, msg_cls = self.create_msg(data["Msg"], data["Type"])
         topic = data["Topic"]

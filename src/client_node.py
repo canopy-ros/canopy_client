@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# Defines the ROSCloudNode class.
 
 import rospy
 import time
@@ -10,7 +11,9 @@ import threading
 
 NODE_NAME = "roscloud_client"
 
-
+# The ROS node object for the ROSCloud client.
+# Manages all connections and subscribing.
+# One instance per client node.
 class ROSCloudNode(object):
 
     def __init__(self, host, port, name, broadcasting, private_key, description):
@@ -27,6 +30,8 @@ class ROSCloudNode(object):
         self.pub_man = pm.PublisherManager()
         self.timer = threading.Timer(0.1, self.descriptionSend)
 
+    # Creates all connections and subscribers and starts them.
+    # Runs a loop that checks for received messages.
     def run(self):
         for topic, msg_type, trusted in self.broadcasting:
             self.create_subscriber(topic, msg_type, trusted)
@@ -56,6 +61,7 @@ class ROSCloudNode(object):
         self.timer.cancel()
         self.descriptionConn.stop()
 
+    # Creates a subscriber for messages of msg_type published on topic.
     def create_subscriber(self, topic, msg_type, trusted):
         namespace, msg_name = msg_type.split("/")
         mod = __import__(namespace + ".msg")
@@ -64,6 +70,8 @@ class ROSCloudNode(object):
         self.subs[topic] = rospy.Subscriber(topic, msg_cls, cb, None, 1)
         return self
 
+    # Creates a callback function for the subscribers.
+    # Formats the packet as a dictionary and sends it to the Connection.
     def create_callback(self, topic, msg_type, trusted):
         def callback(msg):
             data = dict()
@@ -77,6 +85,7 @@ class ROSCloudNode(object):
             self.conn[topic].send_message(data)
         return callback
 
+    # Periodic function to send the client description.
     def descriptionSend(self):
         data = dict()
         data["To"] = ["*"]

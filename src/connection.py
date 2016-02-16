@@ -1,3 +1,4 @@
+# Defines the Connection class.
 
 import zlib
 import threading
@@ -12,6 +13,7 @@ import tornado.httpserver
 import tornado.ioloop
 from std_msgs.msg import Float32
 
+# Represents a threaded websocket connection to the server.
 class Connection(threading.Thread):
 
     def __init__(self, host, port, name, private_key):
@@ -27,6 +29,8 @@ class Connection(threading.Thread):
         self.timer = threading.Timer
         self.freqPub = rospy.Publisher("/{}/ping".format(name), Float32, queue_size=0)
 
+    # Starts the Tornado IOLoop and connects to the websocket.
+    # Called on thread start.
     def run(self):
         while self.ioloop is None:
             self.ioloop = tornado.ioloop.IOLoop()
@@ -37,12 +41,16 @@ class Connection(threading.Thread):
             on_message_callback = self.on_message)
         self.ioloop.start()
 
+    # Stops the IOLoop
     def shutdown(self):
         self.ioloop.stop()
 
+    # Called on thread abortion
     def stop(self):
         self.ioloop.add_callback(self.shutdown)
 
+    # Formats data dictionary as JSON, converts to binary,
+    # compresses using zlib, and sends to the server.
     def send_message_cb(self, data):
         payload = json.dumps(data)
         frmt = "%ds" % len(payload)
@@ -59,15 +67,18 @@ class Connection(threading.Thread):
                 self.timer = threading.Timer(1, self.timeout)
                 self.timer.start()
     
+    # Creates callback to send message in IOLoop.
     def send_message(self, data):
 	if not self.ioloop is None:
         	self.ioloop.add_callback(self.send_message_cb, data)
 
+    # Returns the formatted last received message.
     def updates(self):
         payloads = copy.copy(self.values)
         self.values = dict()
         return payloads
 
+    # Callback for websocket connection. Retries if connection fails.
     def on_connected(self, res):
         try:
             self.connection = res.result()
@@ -85,7 +96,10 @@ class Connection(threading.Thread):
             callback = self.on_connected,
             on_message_callback = self.on_message)
 
-
+    # Callback for message receiving.
+    # Detects between websocket close, acknowledge packet, or message packet.
+    # Decompresses messages, converts to unicode,
+    # and converts from JSON to dictionary.
     def on_message(self, payload):
         if payload is None:
             self.connection = None
@@ -109,6 +123,7 @@ class Connection(threading.Thread):
             data = json.loads(unpacked[1])
             self.values[data["Topic"]] = data
 
+    # Timeout for acknowledge packet.
     def timeout(self):
         self.acknowledged = True
 
