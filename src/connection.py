@@ -87,6 +87,14 @@ class Connection(threading.Thread):
 
 
     def on_message(self, payload):
+        if payload is None:
+            self.connection = None
+            print "Server connection closed. Reconnecting..."
+            tornado.websocket.websocket_connect(
+                    self.url,
+                    self.ioloop,
+                    callback = self.on_connected,
+                    on_message_callback = self.on_message)
         if len(payload) == 1:
             self.acknowledged = True
             try:
