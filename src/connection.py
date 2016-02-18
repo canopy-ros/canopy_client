@@ -27,7 +27,6 @@ class Connection(threading.Thread):
         self.values = dict()
         self.acknowledged = True
         self.timer = threading.Timer
-        self.freqPub = rospy.Publisher("/{}/ping".format(name), Float32, queue_size=0)
 
     # Starts the Tornado IOLoop and connects to the websocket.
     # Called on thread start.
@@ -61,8 +60,6 @@ class Connection(threading.Thread):
         if not self.connection is None:
             if self.acknowledged:
                 self.acknowledged = False
-                if binLen > 1000:
-                    self.freqPub.publish(0.0)
                 self.connection.write_message(compressed, True)
                 self.timer = threading.Timer(1, self.timeout)
                 self.timer.start()

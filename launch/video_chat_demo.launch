@@ -1,16 +1,18 @@
 <?xml version="1.0"?>
 <launch>
-    <node pkg="roscloud" type="client_node.py" name="raphael_client_node" output="screen">
+    <node pkg="roscloud_client" type="client_node.py" name="raphael_client_node" output="screen">
         <param name="name" value="raphael"/>
         <param name="host" value="wallar.me"/>
         <param name="port" value="8080"/>
+        <param name="private_key" value="MIICXAIBAAKBgQCTUQ49FJUCVvU5tIag" /> 
+        <param name="description" value="raphael" />
         <rosparam>
             publishing:
                 - /usb_cam/image_raw/compressed
             types:
                 - sensor_msgs/CompressedImage
             trusted:
-                - alex
+                - "*"
         </rosparam>
 
     </node>
