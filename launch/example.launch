@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="host" default="wallar.me" />
-    <arg name="port" default="8080"/>
+    <arg name="host" default="localhost" />
+    <arg name="port" default="50000"/>
     <node pkg="roscloud_client" type="client_node.py" name="foo_client_node" output="screen">
         <param name="name" value="foo"/>
         <param name="host" value="$(arg host)"/>

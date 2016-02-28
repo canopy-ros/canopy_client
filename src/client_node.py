@@ -88,7 +88,7 @@ class ROSCloudNode(object):
     # Periodic function to send the client description.
     def descriptionSend(self):
         data = dict()
-        data["To"] = ["*"]
+        data["To"] = [".*"]
         data["From"] = self.name
         data["Topic"] = "/{}/description".format(self.name)
         data["Type"] = "std_msgs/String"
