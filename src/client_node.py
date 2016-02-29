@@ -19,7 +19,7 @@ class ROSCloudNode(object):
     def __init__(self, host, port, name, broadcasting, private_key, description):
         self.host = host
         self.port = port
-        self.name = name.replace(" ", "")
+        self.name = name.replace(" ", "").replace("/", "")
         self.conn = dict()
         self.receiver = None
         self.descriptionConn = None
