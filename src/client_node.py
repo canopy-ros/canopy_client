@@ -34,6 +34,8 @@ class ROSCloudNode(object):
     # Runs a loop that checks for received messages.
     def run(self):
         for topic, msg_type, trusted in self.broadcasting:
+            if topic[0] != "/":
+                topic = "/" + topic
             self.create_subscriber(topic, msg_type, trusted)
             if topic == "/receiving":
                 rospy.logerror("{}: topic name 'receiving' is reserved".format(
