@@ -83,10 +83,28 @@ class CanopyClientNode(object):
             data = dict()
             data["To"] = trusted.split(' ')
             data["From"] = self.name
-            data["Topic"] = "/{}{}".format(self.name, topic)
+            if topic == "/tf":
+                data["Topic"] = topic
+            else:
+                data["Topic"] = "/{}{}".format(self.name, topic)
             data["Type"] = msg_type
             data["Stamp"] = time.time()
             data["Private_key"] = self.private_key
+            if msg_type == "tf2_msgs/TFMessage":
+                exit = False
+                for t in msg.transforms:
+                    if t.header.frame_id.count("/") > 1:
+                        exit = True
+                        break;
+                    if t.header.frame_id[0] != "/":
+                        t.header.frame_id = "/" + t.header.frame_id
+                        t.child_frame_id = "/" + t.child_frame_id
+                    t.header.frame_id = "/{}{}".format(self.name,
+                                                       t.header.frame_id)
+                    t.child_frame_id = "/{}{}".format(self.name,
+                                                      t.child_frame_id)
+                if exit:
+                    return
             data["Msg"] = mc.convert_ros_message_to_dictionary(msg)
             self.conn[topic].send_message(data)
         return callback
