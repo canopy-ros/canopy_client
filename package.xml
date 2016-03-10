@@ -1,11 +1,11 @@
 <?xml version="1.0"?>
 <package>
-  <name>roscloud_client</name>
+  <name>canopy_client</name>
   <version>0.0.1</version>
-  <description>ROS Cloud Robotics Framework</description>
+  <description>Canopy - The ROS Cloud Robotics Framework</description>
   <maintainer email="wallar@mit.edu">Alex Wallar</maintainer>
   <license>GPLv3</license>
-  <url type="website">http://github.com/roscloud/roscloud_client</url>
+  <url type="website">http://github.com/canopy-ros/canopy_client</url>
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>rospy</build_depend>
   <build_depend>std_msgs</build_depend>

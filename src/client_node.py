@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Defines the ROSCloudNode class.
+# Defines the CanopyClientNode class.
 
 import rospy
 import time
@@ -9,12 +9,12 @@ from connection import Connection
 import threading
 
 
-NODE_NAME = "roscloud_client"
+NODE_NAME = "canopy_client"
 
-# The ROS node object for the ROSCloud client.
+# The ROS node object for the Canopy client.
 # Manages all connections and subscribing.
 # One instance per client node.
-class ROSCloudNode(object):
+class CanopyClientNode(object):
 
     def __init__(self, host, port, name, broadcasting, private_key, description):
         self.host = host
@@ -33,12 +33,16 @@ class ROSCloudNode(object):
     # Creates all connections and subscribers and starts them.
     # Runs a loop that checks for received messages.
     def run(self):
+        if self.name.startswith("canopy_leaflet_"):
+            rospy.logerr("{}: names starting with 'canopy_leaflet_'"
+            " are reserved".format(self.name))
+            return
         for topic, msg_type, trusted in self.broadcasting:
             if topic[0] != "/":
                 topic = "/" + topic
             self.create_subscriber(topic, msg_type, trusted)
             if topic == "/receiving":
-                rospy.logerror("{}: topic name 'receiving' is reserved".format(
+                rospy.logerr("{}: topic name 'receiving' is reserved".format(
                     self.name))
                 continue
             self.conn[topic] = Connection(host, port, "{}{}".format(
@@ -114,6 +118,6 @@ if __name__ == "__main__":
     private_key = rospy.get_param("~private_key")
     description = rospy.get_param("~description")
     broadcasting = zip(topics, types, trusted)
-    rcn = ROSCloudNode(host, port, name, broadcasting, private_key,
+    rcn = CanopyClientNode(host, port, name, broadcasting, private_key,
         description)
     rcn.run()

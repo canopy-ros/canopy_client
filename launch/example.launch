@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="host" default="localhost" />
-    <arg name="port" default="50000"/>
-    <node pkg="roscloud_client" type="client_node.py" name="foo_client_node" output="screen">
+    <arg name="host" default="raphaelchang.com" />
+    <arg name="port" default="8080"/>
+    <node pkg="canopy_client" type="client_node.py" name="foo_client_node" output="screen">
         <param name="name" value="foo"/>
         <param name="host" value="$(arg host)"/>
         <param name="port" value="$(arg port)"/>
@@ -10,7 +10,7 @@
         <param name="description" value="foo robot" />
     </node>
 
-    <node pkg="roscloud_client" type="client_node.py" name="bar_client_node" output="screen">
+    <node pkg="canopy_client" type="client_node.py" name="bar_client_node" output="screen">
         <param name="name" value="bar"/>
         <param name="host" value="$(arg host)"/>
         <param name="port" value="$(arg port)"/>
@@ -18,7 +18,7 @@
         <param name="description" value="bar robot" />
     </node>
 
-    <node pkg="roscloud_client" type="client_node.py" name="baz_client_node" output="screen">
+    <node pkg="canopy_client" type="client_node.py" name="baz_client_node" output="screen">
         <param name="name" value="baz"/>
         <param name="host" value="$(arg host)"/>
         <param name="port" value="$(arg port)"/>
@@ -26,7 +26,7 @@
         <param name="description" value="baz robot" />
     </node>
 
-    <node pkg="roscloud_client" type="client_node.py" name="qux_client_node" output="screen">
+    <node pkg="canopy_client" type="client_node.py" name="qux_client_node" output="screen">
         <param name="name" value="qux"/>
         <param name="host" value="$(arg host)"/>
         <param name="port" value="$(arg port)"/>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <node pkg="roscloud_client" type="client_node.py" name="raphael_client_node" output="screen">
+    <node pkg="canopy_client" type="client_node.py" name="raphael_client_node" output="screen">
         <param name="name" value="raphael"/>
         <param name="host" value="wallar.me"/>
         <param name="port" value="8080"/>
