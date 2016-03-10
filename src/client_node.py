@@ -16,7 +16,8 @@ NODE_NAME = "canopy_client"
 # One instance per client node.
 class CanopyClientNode(object):
 
-    def __init__(self, host, port, name, broadcasting, private_key, description):
+    def __init__(self, host, port, name, broadcasting, private_key,
+        description, global_frames):
         self.host = host
         self.port = port
         self.name = name.replace(" ", "").replace("/", "")
@@ -27,6 +28,7 @@ class CanopyClientNode(object):
         self.broadcasting = broadcasting
         self.private_key = private_key
         self.description = description
+        self.global_frames = global_frames
         self.pub_man = pm.PublisherManager()
         self.timer = threading.Timer(0.1, self.descriptionSend)
 
@@ -93,21 +95,43 @@ class CanopyClientNode(object):
             if msg_type == "tf2_msgs/TFMessage":
                 exit = False
                 for t in msg.transforms:
-                    if t.header.frame_id.count("/") > 1:
+                    t = self.modify_stamped_message(t)
+                    if t == False:
                         exit = True
-                        break;
-                    if t.header.frame_id[0] != "/":
-                        t.header.frame_id = "/" + t.header.frame_id
-                        t.child_frame_id = "/" + t.child_frame_id
-                    t.header.frame_id = "/{}{}".format(self.name,
-                                                       t.header.frame_id)
-                    t.child_frame_id = "/{}{}".format(self.name,
-                                                      t.child_frame_id)
+                        break
                 if exit:
+                    return
+            else:
+                msg = self.modify_stamped_message(msg)
+                if msg == False:
                     return
             data["Msg"] = mc.convert_ros_message_to_dictionary(msg)
             self.conn[topic].send_message(data)
         return callback
+
+    def modify_stamped_message(self, message):
+        if hasattr(message, 'child_frame_id'):
+            if (message.child_frame_id.find("/") > 0 or
+                    message.child_frame_id.count("/") > 1):
+                return False
+            if message.child_frame_id not in self.global_frames:
+                if message.child_frame_id[0] != "/":
+                    message.child_frame_id = "/" + message.child_frame_id
+                message.child_frame_id = "{}{}".format(self.name,
+                        message.child_frame_id)
+        if hasattr(message, 'header'):
+            if ((not hasattr(message, 'child_frame_id')) and
+                    message.header.frame_id.find("/") > 0 and
+                    message.header.frame_id.count("/") > 1):
+                return False
+            if message.header.frame_id not in self.global_frames:
+                if (message.header.frame_id.find("/") <= 0 and
+                        message.header.frame_id.count("/") <= 1):
+                    if message.header.frame_id[0] != "/":
+                        message.header.frame_id = "/" + message.header.frame_id
+                    message.header.frame_id = "{}{}".format(self.name,
+                            message.header.frame_id)
+        return message
 
     # Periodic function to send the client description.
     def descriptionSend(self):
@@ -131,11 +155,12 @@ if __name__ == "__main__":
     topics = rospy.get_param("~publishing", [])
     types = rospy.get_param("~types", [])
     trusted = rospy.get_param("~trusted", [])
+    global_frames = rospy.get_param("~global_frames", [])
     host = rospy.get_param("~host")
     port = rospy.get_param("~port")
     private_key = rospy.get_param("~private_key")
     description = rospy.get_param("~description")
     broadcasting = zip(topics, types, trusted)
     rcn = CanopyClientNode(host, port, name, broadcasting, private_key,
-        description)
+        description, global_frames)
     rcn.run()

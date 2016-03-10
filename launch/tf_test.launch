@@ -22,12 +22,14 @@
                 - tf2_msgs/TFMessage
             trusted:
                 - ".*"
+            global_frames:
+                - world
         </rosparam>
 
     </node>
 
     <node pkg="tf" type="static_transform_publisher"
-        name="tf_test" args="1 1 2 1 0 0 1 world base_link 100" />
+        name="tf_test" args="1 1 2 1 0 0 1 world map 100" />
     <!--<node pkg="rostopic" type="rostopic" name="state_pub"
-        args="pub -r 100 /tf tf2_msgs/TFMessage '{transforms: [{header : {stamp: {secs: 1457594405, nsecs: 347724387}, frame_id: world, seq: 0}, transform: {translation: {y: 0.0, x: 1.0, z: 2.0}, rotation: {y: 1.0, x: 0.0, z: 0.0, w: 1.0}}, child_frame_id: base_link}]}'" />-->
+        args="pub -r 100 /tf tf2_msgs/TFMessage '{transforms: [{header : {stamp: {secs: 1457594405, nsecs: 347724387}, frame_id: world, seq: 0}, transform: {translation: {y: 0.0, x: 1.0, z: 2.0}, rotation: {y: 1.0, x: 0.0, z: 0.0, w: 1.0}}, child_frame_id: map}]}'" />-->
 </launch>
