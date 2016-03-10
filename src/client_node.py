@@ -82,6 +82,8 @@ class CanopyClientNode(object):
     # Formats the packet as a dictionary and sends it to the Connection.
     def create_callback(self, topic, msg_type, trusted):
         def callback(msg):
+            if msg._connection_header["callerid"] == rospy.get_name():
+                return
             data = dict()
             data["To"] = trusted.split(' ')
             data["From"] = self.name
@@ -93,18 +95,10 @@ class CanopyClientNode(object):
             data["Stamp"] = time.time()
             data["Private_key"] = self.private_key
             if msg_type == "tf2_msgs/TFMessage":
-                exit = False
                 for t in msg.transforms:
                     t = self.modify_stamped_message(t)
-                    if t == False:
-                        exit = True
-                        break
-                if exit:
-                    return
             else:
                 msg = self.modify_stamped_message(msg)
-                if msg == False:
-                    return
             data["Msg"] = mc.convert_ros_message_to_dictionary(msg)
             self.conn[topic].send_message(data)
         return callback
@@ -113,7 +107,7 @@ class CanopyClientNode(object):
         if hasattr(message, 'child_frame_id'):
             if (message.child_frame_id.find("/") > 0 or
                     message.child_frame_id.count("/") > 1):
-                return False
+                return message
             if message.child_frame_id not in self.global_frames:
                 if message.child_frame_id[0] != "/":
                     message.child_frame_id = "/" + message.child_frame_id
@@ -123,7 +117,7 @@ class CanopyClientNode(object):
             if ((not hasattr(message, 'child_frame_id')) and
                     message.header.frame_id.find("/") > 0 and
                     message.header.frame_id.count("/") > 1):
-                return False
+                return message
             if message.header.frame_id not in self.global_frames:
                 if (message.header.frame_id.find("/") <= 0 and
                         message.header.frame_id.count("/") <= 1):
