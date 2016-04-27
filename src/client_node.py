@@ -35,10 +35,6 @@ class CanopyClientNode(object):
     # Creates all connections and subscribers and starts them.
     # Runs a loop that checks for received messages.
     def run(self):
-        if self.name.startswith("canopy_leaflet_"):
-            rospy.logerr("{}: names starting with 'canopy_leaflet_'"
-            " are reserved".format(self.name))
-            return
         for topic, msg_type, trusted in self.broadcasting:
             if topic[0] != "/":
                 topic = "/" + topic
