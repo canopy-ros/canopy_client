@@ -3,8 +3,8 @@
     <arg name="host" default="128.30.25.148" />
     <arg name="port" default="8080"/>
 
-    <node pkg="canopy_client" type="client_node.py" name="qux_client_node" output="screen">
-        <param name="name" value="qux"/>
+    <node pkg="canopy_client" type="client_node.py" name="canopy_node" output="screen">
+        <param name="name" value="$(env CAR_FRAME_ID)"/>
         <param name="host" value="$(arg host)"/>
         <param name="port" value="$(arg port)"/>
         <param name="private_key" value="EjAodXdkTz6RPETFE" />
