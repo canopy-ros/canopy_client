@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="host" default="128.30.25.148" />
+    <arg name="port" default="8080"/>
+
+    <node pkg="canopy_client" type="client_node.py" name="qux_client_node" output="screen">
+        <param name="name" value="qux"/>
+        <param name="host" value="$(arg host)"/>
+        <param name="port" value="$(arg port)"/>
+        <param name="private_key" value="EjAodXdkTz6RPETFE" />
+        <param name="description" value="qux robot" />
+        <rosparam>
+            publishing:
+                - /control
+            types:
+                - multi_car_msgs/CarControl
+        </rosparam>
+
+    </node>
+</launch>
