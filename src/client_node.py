@@ -115,7 +115,8 @@ class CanopyClientNode(object):
                     message.header.frame_id.count("/") > 1):
                 return message
             if message.header.frame_id not in self.global_frames:
-                if (message.header.frame_id.find("/") <= 0 and
+                if (len(message.header.frame_id) > 0 and
+                    message.header.frame_id.find("/") <= 0 and
                         message.header.frame_id.count("/") <= 1):
                     if message.header.frame_id[0] != "/":
                         message.header.frame_id = "/" + message.header.frame_id
