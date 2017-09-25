@@ -37,11 +37,12 @@ class CanopyClientNode(object):
         self.timer = threading.Timer(0.1, self.descriptionSend)
 
     def post_leaflet_urls(self):
-        payload = {"urls": self.leaflets}
-        post_url = "http://{}:{}/{}/leaflets".format(
-            self.host, self.port, self.private_key)
-        r = requests.post(post_url, data=payload)
-        return r
+        if len(self.leaflets) > 0:
+            payload = {"urls": self.leaflets}
+            post_url = "http://{}:{}/{}/leaflets".format(
+                self.host, self.port, self.private_key)
+            r = requests.post(post_url, data=payload)
+            return r
 
     # Creates all connections and subscribers and starts them.
     # Runs a loop that checks for received messages.
