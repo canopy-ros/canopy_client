@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="host" default="raphaelchang.com" />
+    <arg name="port" default="8080"/>
+    <node pkg="canopy_client" type="client_node.py" name="qux_client_node" output="screen">
+        <param name="name" value="qux"/>
+        <param name="host" value="$(arg host)"/>
+        <param name="port" value="$(arg port)"/>
+        <param name="private_key" value="PsFXjmWpszr6acSKL" />
+        <param name="description" value="qux robot" />
+        <rosparam>
+            publishing:
+                - /state
+                - /filtered_state
+                - /test_string
+            types:
+                - geometry_msgs/Point
+                - geometry_msgs/Point
+                - std_msgs/String
+            trusted:
+                - ".*"
+                - foo bar
+                - "ba[a-z]"
+            leaflets:
+                - https://github.com/canopy-ros/canopy_paas_demo
+        </rosparam>
+    </node>
+</launch>

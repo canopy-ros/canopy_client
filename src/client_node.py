@@ -3,6 +3,7 @@
 
 import rospy
 import time
+import requests
 import publishermanager as pm
 from rospy_message_converter import message_converter as mc
 from connection import Connection
@@ -11,13 +12,15 @@ import threading
 
 NODE_NAME = "canopy_client"
 
-# The ROS node object for the Canopy client.
-# Manages all connections and subscribing.
-# One instance per client node.
-class CanopyClientNode(object):
 
+class CanopyClientNode(object):
+    """
+    The ROS node object for the Canopy client.
+    Manages all connections and subscribing.
+    One instance per client node.
+    """
     def __init__(self, host, port, name, broadcasting, private_key,
-        description, global_frames):
+                 description, global_frames, leaflets):
         self.host = host
         self.port = port
         self.name = name.replace(" ", "").replace("/", "")
@@ -29,8 +32,16 @@ class CanopyClientNode(object):
         self.private_key = private_key
         self.description = description
         self.global_frames = global_frames
+        self.leaflets = leaflets
         self.pub_man = pm.PublisherManager()
         self.timer = threading.Timer(0.1, self.descriptionSend)
+
+    def post_leaflet_urls(self):
+        payload = {"urls": self.leaflets}
+        post_url = "http://{}:{}/{}/leaflets".format(
+            self.host, self.port, self.private_key)
+        r = requests.post(post_url, data=payload)
+        return r
 
     # Creates all connections and subscribers and starts them.
     # Runs a loop that checks for received messages.
@@ -53,6 +64,7 @@ class CanopyClientNode(object):
         self.receiver.start()
         self.descriptionConn.start()
         self.timer.start()
+        self.post_leaflet_urls()
         while not rospy.is_shutdown():
             #for key, conn in self.conn.iteritems():
             #    updates = conn.updates()
@@ -61,7 +73,7 @@ class CanopyClientNode(object):
                 self.pub_man.publish(v)
         for key, conn in self.conn.iteritems():
             conn.stop()
-	self.receiver.stop()
+        self.receiver.stop()
         self.timer.cancel()
         self.descriptionConn.stop()
 
@@ -108,7 +120,7 @@ class CanopyClientNode(object):
                 if message.child_frame_id[0] != "/":
                     message.child_frame_id = "/" + message.child_frame_id
                 message.child_frame_id = "{}{}".format(self.name,
-                        message.child_frame_id)
+                                                       message.child_frame_id)
         if hasattr(message, 'header'):
             if ((not hasattr(message, 'child_frame_id')) and
                     message.header.frame_id.find("/") > 0 and
@@ -120,8 +132,8 @@ class CanopyClientNode(object):
                         message.header.frame_id.count("/") <= 1):
                     if message.header.frame_id[0] != "/":
                         message.header.frame_id = "/" + message.header.frame_id
-                    message.header.frame_id = "{}{}".format(self.name,
-                            message.header.frame_id)
+                    message.header.frame_id = "{}{}".format(
+                        self.name, message.header.frame_id)
         return message
 
     # Periodic function to send the client description.
@@ -147,11 +159,12 @@ if __name__ == "__main__":
     types = rospy.get_param("~types", [])
     trusted = rospy.get_param("~trusted", [])
     global_frames = rospy.get_param("~global_frames", [])
+    leaflets = rospy.get_param("leaflets", [])
     host = rospy.get_param("~host")
     port = rospy.get_param("~port")
     private_key = rospy.get_param("~private_key")
     description = rospy.get_param("~description")
     broadcasting = zip(topics, types, trusted)
     rcn = CanopyClientNode(host, port, name, broadcasting, private_key,
-        description, global_frames)
+                           description, global_frames, leaflets)
     rcn.run()
