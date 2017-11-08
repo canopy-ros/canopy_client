@@ -34,7 +34,7 @@ class CanopyClientNode(object):
         self.description = description
         self.global_frames = global_frames
         self.leaflets = leaflets
-        self.pub_man = pm.PublisherManager()
+        self.pub_man = pm.PublisherManager(use_local_time)
         self.timer = threading.Timer(0.1, self.descriptionSend)
 
     def post_leaflet_urls(self):
@@ -113,7 +113,7 @@ class CanopyClientNode(object):
             self.conn[topic].send_message(data)
         return callback
 
-    def modify_child_frame(self, message):
+    def modify_child_frame_id(self, message):
         if (message.child_frame_id.find("/") > 0 or
                 message.child_frame_id.count("/") > 1):
             return message
@@ -137,17 +137,12 @@ class CanopyClientNode(object):
                 message.header.frame_id = "{}{}".format(
                     self.name, message.header.frame_id)
 
-    def modify_header_stamp(self, message):
-        message.header.stamp = rospy.get_rostime()
-
     def modify_stamped_message(self, message):
         if hasattr(message, 'child_frame_id'):
-            self.modify_child_frame(message)
+            self.modify_child_frame_id(message)
 
         if hasattr(message, 'header'):
             self.modify_header_frame_id(message)
-            if self.use_local_time:
-                self.modify_header_stamp(message)
         return message
 
     # Periodic function to send the client description.

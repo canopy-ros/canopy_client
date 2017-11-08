@@ -6,7 +6,8 @@ from rospy_message_converter import message_converter
 # Manages ROS publishers for received messages.
 class PublisherManager(object):
 
-    def __init__(self):
+    def __init__(self, use_local_time):
+        self.use_local_time = use_local_time
         self.pubs = dict()
 
     # Converts message dictionary to ROS message for publishing.
@@ -16,6 +17,8 @@ class PublisherManager(object):
         msg_cls = getattr(mod.msg, msg_name)
         msg = message_converter.convert_dictionary_to_ros_message(
             msg_type, msg_dict)
+        if self.use_local_time and hasattr(msg, "header"):
+            msg.header.stamp = rospy.get_rostime()
         return msg, msg_cls
 
     # Publishes newly received messages.
