@@ -142,7 +142,7 @@ class CanopyClientNode(object):
 
     def modify_stamped_message(self, message):
         if hasattr(message, 'child_frame_id'):
-            self.modify_child_frame_msg(message)
+            self.modify_child_frame(message)
 
         if hasattr(message, 'header'):
             self.modify_header_frame_id(message)
