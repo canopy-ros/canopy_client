@@ -20,10 +20,11 @@ class CanopyClientNode(object):
     One instance per client node.
     """
     def __init__(self, host, port, name, broadcasting, private_key,
-                 description, global_frames, leaflets):
+                 description, global_frames, leaflets, use_local_time):
         self.host = host
         self.port = port
         self.name = name.replace(" ", "").replace("/", "")
+        self.use_local_time = use_local_time
         self.conn = dict()
         self.receiver = None
         self.descriptionConn = None
@@ -112,29 +113,41 @@ class CanopyClientNode(object):
             self.conn[topic].send_message(data)
         return callback
 
+    def modify_child_frame(self, message):
+        if (message.child_frame_id.find("/") > 0 or
+                message.child_frame_id.count("/") > 1):
+            return message
+        if message.child_frame_id not in self.global_frames:
+            if message.child_frame_id[0] != "/":
+                message.child_frame_id = "/" + message.child_frame_id
+            message.child_frame_id = "{}{}".format(self.name,
+                                                   message.child_frame_id)
+
+    def modify_header_frame_id(self, message):
+        if ((not hasattr(message, 'child_frame_id')) and
+                message.header.frame_id.find("/") > 0 and
+                message.header.frame_id.count("/") > 1):
+            return message
+        if message.header.frame_id not in self.global_frames:
+            if (len(message.header.frame_id) > 0 and
+                message.header.frame_id.find("/") <= 0 and
+                    message.header.frame_id.count("/") <= 1):
+                if message.header.frame_id[0] != "/":
+                    message.header.frame_id = "/" + message.header.frame_id
+                message.header.frame_id = "{}{}".format(
+                    self.name, message.header.frame_id)
+
+    def modify_header_stamp(self, message):
+        message.header.stamp = rospy.get_rostime()
+
     def modify_stamped_message(self, message):
         if hasattr(message, 'child_frame_id'):
-            if (message.child_frame_id.find("/") > 0 or
-                    message.child_frame_id.count("/") > 1):
-                return message
-            if message.child_frame_id not in self.global_frames:
-                if message.child_frame_id[0] != "/":
-                    message.child_frame_id = "/" + message.child_frame_id
-                message.child_frame_id = "{}{}".format(self.name,
-                                                       message.child_frame_id)
+            self.modify_child_frame_msg(message)
+
         if hasattr(message, 'header'):
-            if ((not hasattr(message, 'child_frame_id')) and
-                    message.header.frame_id.find("/") > 0 and
-                    message.header.frame_id.count("/") > 1):
-                return message
-            if message.header.frame_id not in self.global_frames:
-                if (len(message.header.frame_id) > 0 and
-                    message.header.frame_id.find("/") <= 0 and
-                        message.header.frame_id.count("/") <= 1):
-                    if message.header.frame_id[0] != "/":
-                        message.header.frame_id = "/" + message.header.frame_id
-                    message.header.frame_id = "{}{}".format(
-                        self.name, message.header.frame_id)
+            self.modify_header_frame_id(message)
+            if self.use_local_time:
+                self.modify_header_stamp(message)
         return message
 
     # Periodic function to send the client description.
@@ -161,11 +174,13 @@ if __name__ == "__main__":
     trusted = rospy.get_param("~trusted", [])
     global_frames = rospy.get_param("~global_frames", [])
     leaflets = rospy.get_param("leaflets", [])
+    use_local_time = rospy.get_param("use_local_time", False)
     host = rospy.get_param("~host")
     port = rospy.get_param("~port")
     private_key = rospy.get_param("~private_key")
     description = rospy.get_param("~description")
     broadcasting = zip(topics, types, trusted)
     rcn = CanopyClientNode(host, port, name, broadcasting, private_key,
-                           description, global_frames, leaflets)
+                           description, global_frames, leaflets,
+                           use_local_time)
     rcn.run()
