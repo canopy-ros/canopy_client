@@ -31,5 +31,5 @@ class PublisherManager(object):
         msg, msg_cls = self.create_msg(data["Msg"], data["Type"])
         topic = data["Topic"]
         if not topic in self.pubs.keys():
-            self.pubs[topic] = rospy.Publisher(topic, msg_cls, queue_size=2)
+            self.pubs[topic] = rospy.Publisher(topic, msg_cls, queue_size=1)
         self.pubs[topic].publish(msg)

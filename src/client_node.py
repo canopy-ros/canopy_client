@@ -85,7 +85,7 @@ class CanopyClientNode(object):
         mod = __import__(namespace + ".msg")
         msg_cls = getattr(mod.msg, msg_name)
         cb = self.create_callback(topic, msg_type, trusted)
-        self.subs[topic] = rospy.Subscriber(topic, msg_cls, cb, None, 1)
+        self.subs[topic] = rospy.Subscriber(topic, msg_cls, cb, queue_size=1)
         return self
 
     # Creates a callback function for the subscribers.
