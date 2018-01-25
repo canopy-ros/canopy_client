@@ -51,3 +51,5 @@ To check whether the chrony daemon `chronyd` is working correctly, first setup c
 0 sources with unknown address
 ```
 If you see the message `506 Cannot talk to daemon`, then `chronyd` is not running properly.
+
+Finally run `chronyc sources` and you should see your Canopy server's IP address listed. If you are connecting the chrony client to the chrony server for the first time, it may take several minutes before the correct IP is listed under sources. 
