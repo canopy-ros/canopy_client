@@ -1,0 +1,12 @@
+[Unit]
+Description = chrony service for canopy client
+Conflicts = ntpd.service
+
+[Service]
+Type = forking
+Restart = always
+PIDFile = /var/run/chronyd.pid
+ExecStart = /usr/sbin/chronyd -f /etc/chrony/chrony_canopy_client.conf -r -s
+
+[Install]
+WantedBy = default.target
