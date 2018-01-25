@@ -23,3 +23,5 @@ cd ../..
 catkin_make
 . ./devel/setup.bash
 cd $CANOPY_CLIENT_DIR
+trap - ERR
+echo "SUCCESS - script successfully installed."
