@@ -41,10 +41,10 @@ Active: active (running)
 ...
 ```
 
-To check whether the chrony daemon `chronyd` is working correctly, run `chronyc activity` which should return the following:
+To check whether the chrony daemon `chronyd` is working correctly, first setup chrony on the [Canopy server](https://github.com/canopy-ros/canopy_server_startup/) and ensure that it is running correctly. Then run `chronyc activity` on the client which should return the following:
 ```
 200 OK
-3 sources online
+1 sources online
 0 sources offline
 0 sources doing burst (return to online)
 0 sources doing burst (return to offline)
