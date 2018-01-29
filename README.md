@@ -20,7 +20,7 @@ Modify the chrony configuration file `/etc/chrony/chrony_canopy_client.conf` to 
 server 128.31.37.168 iburst
 ...
 ```
-Disable and stop the default chrony service:
+Disable and stop the default chrony service (it's fine if it gives a warning after the disable step):
 ```
 sudo systemctl stop chrony
 sudo systemctl disable chrony
