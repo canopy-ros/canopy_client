@@ -22,4 +22,7 @@ before_script:
     - cd ~/catkin_ws/src
 
 script:
+    - git clone https://github.com/baalexander/rospy_message_converter
+    - git clone https://github.com/canopy-ros/canopy_client
+    - cd canopy_client
     - source canopy_client_install.sh
