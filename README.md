@@ -17,7 +17,7 @@ This section describes the _client-side_ instructions for synchronizing the cloc
 Modify the chrony configuration file `/etc/chrony/chrony_canopy_client.conf` to reflect your Canopy server's IP address:
 ```
 # /etc/chrony/chrony_canopy_client.conf
-server 128.31.37.168
+server 128.31.37.168 iburst
 ...
 ```
 Disable and stop the default chrony service:
