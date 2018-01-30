@@ -9,14 +9,14 @@ function err_fn() {
 }
 trap "err_fn; return" ERR
 
-# install python packages
-pip install -r requirements.txt
-
 # setup chrony
 sudo apt-get update
-sudo apt-get install chrony
+sudo apt-get -y install chrony
 sudo cp chrony_canopy_client.service /lib/systemd/system
 sudo cp chrony_canopy_client.conf /etc/chrony
+
+# install python packages
+pip install -r requirements.txt
 
 # make ros package
 cd ../..
