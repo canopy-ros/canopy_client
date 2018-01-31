@@ -103,7 +103,7 @@ class CanopyClientNode(object):
                 data["Topic"] = "/{}{}".format(self.name, topic)
             data["Type"] = msg_type
             data["Stamp"] = time.time()
-            data["Private_key"] = self.private_key
+            data["PrivateKey"] = self.private_key
             if msg_type == "tf2_msgs/TFMessage":
                 for t in msg.transforms:
                     t = self.modify_stamped_message(t)
