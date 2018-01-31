@@ -153,7 +153,7 @@ class CanopyClientNode(object):
         data["Topic"] = "/{}/description".format(self.name)
         data["Type"] = "std_msgs/String"
         data["Stamp"] = time.time()
-        data["Private_key"] = self.private_key
+        data["PrivateKey"] = self.private_key
         msg = dict()
         msg["data"] = self.description
         data["Msg"] = msg
