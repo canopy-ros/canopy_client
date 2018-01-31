@@ -1,4 +1,6 @@
 # Canopy Client
+![Build Status](https://travis-ci.org/canopy-ros/canopy_client.svg?branch=master) ![Docs Status](http://readthedocs.org/projects/canopy-docs/badge/?version=latest)
+
 This is the ROS node for the client-side application of Canopy.
 
 ## Installation
