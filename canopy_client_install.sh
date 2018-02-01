@@ -1,13 +1,14 @@
-#!/bin/sh
+#!/bin/bash
 CANOPY_CLIENT_DIR=$(pwd)
 
 # trap errors
-function err_fn() {
-    echo 'ERROR - aborting script.'
+export INSTALL_STATUS=0
+err_fn() {
+    INSTALL_STATUS=1
     cd $CANOPY_CLIENT_DIR
-    trap - ERR
+    echo 'ERROR - aborting script.'
 }
-trap "err_fn; return" ERR
+trap "err_fn; trap - ERR; return" ERR
 
 # setup chrony
 sudo apt-get update

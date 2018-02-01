@@ -26,3 +26,4 @@ script:
     - git clone https://github.com/canopy-ros/canopy_client
     - cd canopy_client
     - source canopy_client_install.sh
+    - exit $INSTALL_STATUS
