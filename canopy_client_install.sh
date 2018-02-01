@@ -17,7 +17,7 @@ sudo cp chrony_canopy_client.service /lib/systemd/system
 sudo cp chrony_canopy_client.conf /etc/chrony
 
 # install python packages
-pip install -r requirements.txt
+sudo pip install -r requirements.txt
 
 # make ros package
 cd ../..
