@@ -112,6 +112,8 @@ class Connection(threading.Thread):
                 self.timer.cancel()
             except:
                 pass
+        elif len(payload) == 2:
+            self.connection.write_message(chr(1), True)
         else:
             decompressed = zlib.decompress(payload)
             size = struct.unpack('=I', decompressed[:4])
@@ -119,6 +121,17 @@ class Connection(threading.Thread):
             unpacked = struct.unpack('=I' + frmt, decompressed)
             data = json.loads(unpacked[1])
             self.values[data["Topic"]] = data
+            self.connection.write_message(chr(1), True)
+
+    def on_close(self):
+        self.connection = None
+        print "Server connection closed. Reconnecting..."
+        tornado.websocket.websocket_connect(
+                self.url,
+                self.ioloop,
+                callback = self.on_connected,
+                on_message_callback = self.on_message)
+
 
     # Timeout for acknowledge packet.
     def timeout(self):
