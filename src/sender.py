@@ -39,5 +39,5 @@ class Sender():
     # Creates callback to send message in IOLoop.
     def send_message(self, data):
         self.data = data
-        self.worker = threading.Thread(target = self.run)
+        self.worker = threading.Thread(target=self.run)
         self.worker.start()
