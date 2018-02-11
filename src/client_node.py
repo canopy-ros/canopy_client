@@ -6,8 +6,10 @@ import time
 import requests
 import publishermanager as pm
 from rospy_message_converter import message_converter as mc
-from connection import Connection
+from sender import Sender
+from receiver import Receiver
 import threading
+import socket
 
 
 NODE_NAME = "canopy_client"
@@ -25,9 +27,9 @@ class CanopyClientNode(object):
         self.port = port
         self.name = name.replace(" ", "").replace("/", "")
         self.use_local_time = use_local_time
-        self.conn = dict()
+        self.senders = dict()
         self.receiver = None
-        self.descriptionConn = None
+        self.descriptionSender = None
         self.subs = dict()
         self.broadcasting = broadcasting
         self.private_key = private_key
@@ -36,6 +38,7 @@ class CanopyClientNode(object):
         self.leaflets = leaflets
         self.pub_man = pm.PublisherManager(use_local_time)
         self.timer = threading.Timer(0.1, self.descriptionSend)
+        self.socket = None
 
     def post_leaflet_urls(self):
         if len(self.leaflets) > 0:
@@ -48,36 +51,35 @@ class CanopyClientNode(object):
     # Creates all connections and subscribers and starts them.
     # Runs a loop that checks for received messages.
     def run(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.connect((self.host, self.port))
+        self.socket.settimeout(1.0)
+        while True:
+            try:
+                self.socket.sendto("CONNECT:{}:{}".format(self.private_key, self.name), (self.host, self.port))
+                reply, addr = self.socket.recvfrom(64)
+                if reply == "HANDSHAKE":
+                    print "[{}-canopy-client] Connected to server.".format(self.name)
+                    break
+            except socket.timeout:
+                print "[{}-canopy-client] Connection timed out. Retrying...".format(self.name)
+                continue
+        self.socket.setblocking(1)
         for topic, msg_type, trusted in self.broadcasting:
             if topic[0] != "/":
                 topic = "/" + topic
             self.create_subscriber(topic, msg_type, trusted)
-            if topic == "/receiving":
-                rospy.logerr("{}: topic name 'receiving' is reserved".format(
-                    self.name))
-                continue
-            self.conn[topic] = Connection(host, port, "{}{}".format(
-                self.name, topic), private_key)
-            self.conn[topic].start()
-        self.receiver = Connection(host, port, "{}{}".format(
-            self.name, "/receiving"), private_key)
-        self.descriptionConn = Connection(host, port, "{}/description".format(
-            self.name), private_key)
+            self.senders[topic] = Sender(self.socket)
+        self.descriptionSender = Sender(self.socket)
+        self.receiver = Receiver(self.socket)
         self.receiver.start()
-        self.descriptionConn.start()
         self.timer.start()
         self.post_leaflet_urls()
         while not rospy.is_shutdown():
-            #for key, conn in self.conn.iteritems():
-            #    updates = conn.updates()
             updates = self.receiver.updates()
             for v in updates.values():
                 self.pub_man.publish(v)
-        for key, conn in self.conn.iteritems():
-            conn.stop()
-        self.receiver.stop()
         self.timer.cancel()
-        self.descriptionConn.stop()
 
     # Creates a subscriber for messages of msg_type published on topic.
     def create_subscriber(self, topic, msg_type, trusted):
@@ -110,7 +112,7 @@ class CanopyClientNode(object):
             else:
                 msg = self.modify_stamped_message(msg)
             data["Msg"] = mc.convert_ros_message_to_dictionary(msg)
-            self.conn[topic].send_message(data)
+            self.senders[topic].send_message(data)
         return callback
 
     def modify_child_frame_id(self, message):
@@ -157,7 +159,7 @@ class CanopyClientNode(object):
         msg = dict()
         msg["data"] = self.description
         data["Msg"] = msg
-        self.descriptionConn.send_message(data)
+        self.descriptionSender.send_message(data)
         self.timer = threading.Timer(0.1, self.descriptionSend)
         self.timer.start()
 
