@@ -52,6 +52,8 @@ class CanopyClientNode(object):
     # Runs a loop that checks for received messages.
     def run(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
+        self.socket.setsockopt(socket.SOL_IP, 10, 0)
         self.socket.connect((self.host, self.port))
         self.socket.settimeout(1.0)
         while True:
