@@ -16,6 +16,9 @@ from std_msgs.msg import Float32
 # Represents a threaded websocket connection to the server.
 class Connection(threading.Thread):
 
+    ACK_LEN = 1
+    HBEAT_LEN = 2
+
     def __init__(self, host, port, name, private_key):
         super(Connection, self).__init__()
         self.host = host
@@ -36,8 +39,8 @@ class Connection(threading.Thread):
         tornado.websocket.websocket_connect(
             self.url,
             self.ioloop,
-            callback = self.on_connected,
-            on_message_callback = self.on_message)
+            callback=self.on_connected,
+            on_message_callback=self.on_message)
         self.ioloop.start()
 
     # Stops the IOLoop
@@ -83,15 +86,15 @@ class Connection(threading.Thread):
                 tornado.websocket.websocket_connect(
                     self.url,
                     self.ioloop,
-                    callback = self.on_connected,
-                    on_message_callback = self.on_message)
+                    callback=self.on_connected,
+                    on_message_callback=self.on_message)
         except Exception, e:
             print "Failed to connect: {}".format(e)
             tornado.websocket.websocket_connect(
             self.url,
             self.ioloop,
-            callback = self.on_connected,
-            on_message_callback = self.on_message)
+            callback=self.on_connected,
+            on_message_callback=self.on_message)
 
     # Callback for message receiving.
     # Detects between websocket close, acknowledge packet, or message packet.
@@ -104,14 +107,17 @@ class Connection(threading.Thread):
             tornado.websocket.websocket_connect(
                     self.url,
                     self.ioloop,
-                    callback = self.on_connected,
-                    on_message_callback = self.on_message)
-        if len(payload) == 1:
+                    callback=self.on_connected,
+                    on_message_callback=self.on_message)
+        if len(payload) == Connection.ACK_LEN:
             self.acknowledged = True
             try:
                 self.timer.cancel()
             except:
                 pass
+        elif len(payload) == Connection.HBEAT_LEN:
+            ack_dummy_byte = chr(1)
+            self.connection.write_message(ack_dummy_byte, True)
         else:
             decompressed = zlib.decompress(payload)
             size = struct.unpack('=I', decompressed[:4])
@@ -119,6 +125,18 @@ class Connection(threading.Thread):
             unpacked = struct.unpack('=I' + frmt, decompressed)
             data = json.loads(unpacked[1])
             self.values[data["Topic"]] = data
+            ack_dummy_byte = chr(1)
+            self.connection.write_message(ack_dummy_byte, True)
+
+    def on_close(self):
+        self.connection = None
+        print "Server connection closed. Reconnecting..."
+        tornado.websocket.websocket_connect(
+                self.url,
+                self.ioloop,
+                callback=self.on_connected,
+                on_message_callback=self.on_message)
+
 
     # Timeout for acknowledge packet.
     def timeout(self):

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="host" default="raphaelchang.com" />
+    <arg name="host" default="wallarelvo-tower.csail.mit.edu" />
     <arg name="port" default="8080"/>
     <node pkg="canopy_client" type="client_node.py" name="foo_client_node" output="screen">
         <param name="name" value="foo"/>
@@ -8,6 +8,26 @@
         <param name="port" value="$(arg port)"/>
         <param name="private_key" value="PsFXjmWpszr6acSKL" />
         <param name="description" value="foo robot" />
+        <rosparam>
+            publishing:
+                - /state
+                - /filtered_state
+                - /test_string
+                - /test_string2
+                - /test_string3
+            types:
+                - geometry_msgs/Point
+                - geometry_msgs/PointStamped
+                - std_msgs/String
+                - std_msgs/String
+                - std_msgs/String
+            trusted:
+                - foo bar
+                - "ba[a-z]"
+                - ".*"
+                - ".*"
+                - ".*"
+        </rosparam>
     </node>
 
     <node pkg="canopy_client" type="client_node.py" name="bar_client_node" output="screen">
@@ -16,6 +36,26 @@
         <param name="port" value="$(arg port)"/>
         <param name="private_key" value="PsFXjmWpszr6acSKL" />
         <param name="description" value="bar robot" />
+        <rosparam>
+            publishing:
+                - /state
+                - /filtered_state
+                - /test_string
+                - /test_string2
+                - /test_string3
+            types:
+                - geometry_msgs/Point
+                - geometry_msgs/PointStamped
+                - std_msgs/String
+                - std_msgs/String
+                - std_msgs/String
+            trusted:
+                - foo bar
+                - "ba[a-z]"
+                - ".*"
+                - ".*"
+                - ".*"
+        </rosparam>
     </node>
 
     <node pkg="canopy_client" type="client_node.py" name="baz_client_node" output="screen">
@@ -24,6 +64,26 @@
         <param name="port" value="$(arg port)"/>
         <param name="private_key" value="PsFXjmWpszr6acSKL" />
         <param name="description" value="baz robot" />
+        <rosparam>
+            publishing:
+                - /state
+                - /filtered_state
+                - /test_string
+                - /test_string2
+                - /test_string3
+            types:
+                - geometry_msgs/Point
+                - geometry_msgs/PointStamped
+                - std_msgs/String
+                - std_msgs/String
+                - std_msgs/String
+            trusted:
+                - foo bar
+                - "ba[a-z]"
+                - ".*"
+                - ".*"
+                - ".*"
+        </rosparam>
     </node>
 
     <node pkg="canopy_client" type="client_node.py" name="qux_client_node" output="screen">
@@ -37,24 +97,34 @@
                 - /state
                 - /filtered_state
                 - /test_string
+                - /test_string2
+                - /test_string3
             types:
                 - geometry_msgs/Point
-                - geometry_msgs/Point
+                - geometry_msgs/PointStamped
+                - std_msgs/String
+                - std_msgs/String
                 - std_msgs/String
             trusted:
-                - ".*"
                 - foo bar
                 - "ba[a-z]"
+                - ".*"
+                - ".*"
+                - ".*"
         </rosparam>
 
     </node>
 
     <node pkg="rostopic" type="rostopic" name="state_pub"
-        args="pub -r 100 /state geometry_msgs/Point '{x: 1, y: 1, z: 0}'"/>
+        args="pub -r 200 /state geometry_msgs/Point '{x: 1, y: 1, z: 0}'"/>
     <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
-        args="pub -r 100 /filtered_state geometry_msgs/Point '{x: 2, y: 1, z: 1}'" />
+        args="pub -sr 200 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" />
     <node pkg="rostopic" type="rostopic" name="string_pub"
-        args="pub -r 100 /test_string std_msgs/String 'test'" />
+        args="pub -r 200 /test_string std_msgs/String 'test'" />
+    <node pkg="rostopic" type="rostopic" name="string_pub2"
+        args="pub -r 200 /test_string2 std_msgs/String 'test2'" />
+    <node pkg="rostopic" type="rostopic" name="string_pub3"
+        args="pub -r 200 /test_string3 std_msgs/String 'test3'" />
     <node pkg="tf" type="static_transform_publisher"
         name="tf_test" args="1 0 0 0 0 0 1 world base_link 100" />
     <!--<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
