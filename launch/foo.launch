@@ -31,17 +31,15 @@
     </node>
 
     <node pkg="rostopic" type="rostopic" name="state_pub"
-        args="pub -r 200 /state geometry_msgs/Point '{x: 1, y: 1, z: 0}'"/>
+        args="pub -r 20 /state geometry_msgs/Point '{x: 1, y: 1, z: 0}'"/>
     <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
-        args="pub -sr 200 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" />
+        args="pub -sr 20 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" />
     <node pkg="rostopic" type="rostopic" name="string_pub"
-        args="pub -r 200 /test_string std_msgs/String 'test'" />
+        args="pub -r 20 /test_string std_msgs/String 'test'" />
     <node pkg="rostopic" type="rostopic" name="string_pub2"
-        args="pub -r 200 /test_string2 std_msgs/String 'test2'" />
+        args="pub -r 20 /test_string2 std_msgs/String 'test2'" />
     <node pkg="rostopic" type="rostopic" name="string_pub3"
-        args="pub -r 200 /test_string3 std_msgs/String 'test3'" />
-    <node pkg="tf" type="static_transform_publisher"
-        name="tf_test" args="1 0 0 0 0 0 1 world base_link 100" />
+        args="pub -r 20 /test_string3 std_msgs/String 'test3'" />
     <!--<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
         <param name="video_device" value="/dev/video0" />
         <param name="image_width" value="640" />
