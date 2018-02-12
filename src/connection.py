@@ -12,7 +12,6 @@ import tornado.websocket
 import tornado.httpserver
 import tornado.ioloop
 from std_msgs.msg import Float32
-
 # Represents a threaded websocket connection to the server.
 class Connection(threading.Thread):
 
@@ -63,9 +62,13 @@ class Connection(threading.Thread):
         if not self.connection is None:
             if self.acknowledged:
                 self.acknowledged = False
+                start = time.time()
                 self.connection.write_message(compressed, True)
+                end = time.time()
+                print "Write time: {}".format(end - start)
                 self.timer = threading.Timer(1, self.timeout)
                 self.timer.start()
+        
     
     # Creates callback to send message in IOLoop.
     def send_message(self, data):
