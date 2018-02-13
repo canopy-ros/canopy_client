@@ -6,20 +6,20 @@
         <param name="name" value="bar"/>
         <param name="host" value="$(arg host)"/>
         <param name="port" value="$(arg port)"/>
-        <param name="private_key" value="PsFXjmWpszr6acSKL" />
+        <param name="private_key" value="abc" />
         <param name="description" value="bar robot" />
-        <rosparam>
-            publishing:
-                - /filtered_state
-            types:
-                - geometry_msgs/PointStamped
-            trusted:
-                - foo
-        </rosparam>
+        <!-- <rosparam> -->
+        <!--     publishing: -->
+        <!--         &#45; /filtered_state -->
+        <!--     types: -->
+        <!--         &#45; geometry_msgs/PointStamped -->
+        <!--     trusted: -->
+        <!--         &#45; foo -->
+        <!-- </rosparam> -->
     </node>
 
-    <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
-        args="pub -sr 40 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" />
+    <!-- <node pkg="rostopic" type="rostopic" name="filtered_state_pub" -->
+    <!--     args="pub &#45;sr 40 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" /> -->
     <!--<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
         <param name="video_device" value="/dev/video0" />
         <param name="image_width" value="640" />
