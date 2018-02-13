@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="host" default="wallar.csail.mit.edu"/>
+    <arg name="port" default="8080"/>
+    <node pkg="canopy_client" type="client_node.py" name="bar_client_node" output="screen">
+        <param name="name" value="bar"/>
+        <param name="host" value="$(arg host)"/>
+        <param name="port" value="$(arg port)"/>
+        <param name="private_key" value="abc" />
+        <param name="description" value="bar robot" />
+        <!--<rosparam> 
+            publishing:
+                - /filtered_state
+            types:
+                - geometry_msgs/PointStamped
+            trusted:
+                - ".*"
+        </rosparam> -->
+    </node>
+
+    <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
+        args="pub -sr 40 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" />
+</launch>

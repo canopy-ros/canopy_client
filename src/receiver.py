@@ -28,7 +28,8 @@ class Receiver(threading.Thread):
 
     # Returns the formatted last received message.
     def updates(self):
-        payloads = copy.copy(self.values)
+        #payloads = copy.copy(self.values)
+        payloads = self.values
         self.values = dict()
         return payloads
 
