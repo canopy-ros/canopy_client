@@ -71,7 +71,6 @@ class CanopyClientNode(object):
             updates = self.receiver.updates()
             for v in updates.values():
                 self.pub_man.publish(v)
-        
         for key, conn in self.conn.iteritems():
             conn.stop()
         self.receiver.stop()

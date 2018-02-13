@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<launch>
+    <arg name="host" default="wallar.csail.mit.edu"/>
+    <arg name="port" default="8080"/>
+    <node pkg="canopy_client" type="connection_bench.py" name="foo_connection" output="screen">
+    </node>
+</launch>
