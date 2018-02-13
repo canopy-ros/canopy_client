@@ -1,56 +1,23 @@
 <?xml version="1.0"?>
 <launch>
-    <arg name="host" default="192.168.1.110"/>
+    <arg name="host" default="wallar.csail.mit.edu"/>
     <arg name="port" default="8080"/>
     <node pkg="canopy_client" type="client_node.py" name="foo_client_node" output="screen">
         <param name="name" value="foo"/>
         <param name="host" value="$(arg host)"/>
         <param name="port" value="$(arg port)"/>
-        <param name="private_key" value="PsFXjmWpszr6acSKL" />
+        <param name="private_key" value="abc" />
         <param name="description" value="foo robot" />
         <rosparam>
             publishing:
-                - /state
                 - /filtered_state
-                - /test_string
-                - /test_string2
-                - /test_string3
             types:
-                - geometry_msgs/Point
                 - geometry_msgs/PointStamped
-                - std_msgs/String
-                - std_msgs/String
-                - std_msgs/String
             trusted:
-                - ".*"
-                - ".*"
-                - ".*"
-                - ".*"
                 - ".*"
         </rosparam>
     </node>
 
-    <node pkg="rostopic" type="rostopic" name="state_pub"
-        args="pub -r 20 /state geometry_msgs/Point '{x: 1, y: 1, z: 0}'"/>
     <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
         args="pub -sr 20 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" />
-    <node pkg="rostopic" type="rostopic" name="string_pub"
-        args="pub -r 20 /test_string std_msgs/String 'test'" />
-    <node pkg="rostopic" type="rostopic" name="string_pub2"
-        args="pub -r 20 /test_string2 std_msgs/String 'test2'" />
-    <node pkg="rostopic" type="rostopic" name="string_pub3"
-        args="pub -r 20 /test_string3 std_msgs/String 'test3'" />
-    <!--<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
-        <param name="video_device" value="/dev/video0" />
-        <param name="image_width" value="640" />
-        <param name="image_height" value="480" />
-        <param name="pixel_format" value="yuyv" />
-        <param name="camera_frame_id" value="usb_cam" />
-        <param name="io_method" value="mmap"/>
-    </node>-->
-    <!-- <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen"> -->
-    <!--     <remap from="image" to="/qux/usb_cam/image_raw"/> -->
-    <!--     <param name="autosize" value="true" /> -->
-    <!-- </node> -->
-
 </launch>
