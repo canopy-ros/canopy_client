@@ -64,8 +64,8 @@ class CanopyClientNode(object):
         self.descriptionConn = Connection(host, port, "{}/description".format(
             self.name), private_key)
         self.receiver.start()
-        self.descriptionConn.start()
-        self.timer.start()
+        # self.descriptionConn.start()
+        # self.timer.start()
         #self.post_leaflet_urls()
         while not rospy.is_shutdown():
             updates = self.receiver.updates()
