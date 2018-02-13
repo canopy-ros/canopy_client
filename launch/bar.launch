@@ -8,29 +8,16 @@
         <param name="port" value="$(arg port)"/>
         <param name="private_key" value="abc" />
         <param name="description" value="bar robot" />
-        <!-- <rosparam> -->
-        <!--     publishing: -->
-        <!--         &#45; /filtered_state -->
-        <!--     types: -->
-        <!--         &#45; geometry_msgs/PointStamped -->
-        <!--     trusted: -->
-        <!--         &#45; foo -->
-        <!-- </rosparam> -->
+        <rosparam>
+        	publishing:
+        		- /filtered_state
+        	types:
+        		- geometry_msgs/PointStamped
+        	trusted:
+        		- ".*"
+        </rosparam>
     </node>
 
-    <!-- <node pkg="rostopic" type="rostopic" name="filtered_state_pub" -->
-    <!--     args="pub &#45;sr 40 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" /> -->
-    <!--<node name="usb_cam" pkg="usb_cam" type="usb_cam_node" output="screen" >
-        <param name="video_device" value="/dev/video0" />
-        <param name="image_width" value="640" />
-        <param name="image_height" value="480" />
-        <param name="pixel_format" value="yuyv" />
-        <param name="camera_frame_id" value="usb_cam" />
-        <param name="io_method" value="mmap"/>
-    </node>-->
-    <!-- <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen"> -->
-    <!--     <remap from="image" to="/qux/usb_cam/image_raw"/> -->
-    <!--     <param name="autosize" value="true" /> -->
-    <!-- </node> -->
-
+    <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
+        args="pub -sr 40 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" />
 </launch>
