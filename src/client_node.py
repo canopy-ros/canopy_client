@@ -55,17 +55,18 @@ class CanopyClientNode(object):
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
         self.socket.setsockopt(socket.SOL_IP, 10, 0)
         self.socket.connect((self.host, self.port))
-        self.socket.settimeout(1.0)
-        while True:
-            try:
-                self.socket.sendto("CONNECT:{}:{}".format(self.private_key, self.name), (self.host, self.port))
-                reply, addr = self.socket.recvfrom(64)
-                if reply == "HANDSHAKE":
-                    print "[{}-canopy-client] Connected to server.".format(self.name)
-                    break
-            except socket.timeout:
-                print "[{}-canopy-client] Connection timed out. Retrying...".format(self.name)
-                continue
+        self.socket.sendto("CONNECT:{}:{}".format(self.private_key, self.name), (self.host, self.port))
+        # self.socket.settimeout(1.0)
+        # while True:
+            # try:
+                # self.socket.sendto("CONNECT:{}:{}".format(self.private_key, self.name), (self.host, self.port))
+                # reply, addr = self.socket.recvfrom(64)
+                # if reply == "HANDSHAKE":
+                    # print "[{}-canopy-client] Connected to server.".format(self.name)
+                    # break
+            # except socket.timeout:
+                # print "[{}-canopy-client] Connection timed out. Retrying...".format(self.name)
+                # continue
         self.socket.setblocking(1)
         for topic, msg_type, trusted in self.broadcasting:
             if topic[0] != "/":

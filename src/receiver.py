@@ -42,7 +42,6 @@ class Receiver(threading.Thread):
             frmt = "%ds" % size[0]
             unpacked = struct.unpack('=I' + frmt, decompressed)
             data = json.loads(unpacked[1])
-            print data
             self.values[data["Topic"]] = data
         except:
             pass
