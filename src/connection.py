@@ -65,8 +65,8 @@ class Connection(threading.Thread):
             self.connection.write_message(compressed, True)
             end = time.time()
             # print "Write time: {}".format(end - start)
-            self.timer = threading.Timer(1, self.timeout)
-            self.timer.start()
+            # self.timer = threading.Timer(1, self.timeout)
+            # self.timer.start()
 
 
     # Creates callback to send message in IOLoop.
@@ -93,10 +93,10 @@ class Connection(threading.Thread):
         except Exception as e:
             print("Failed to connect: {}".format(e))
             tornado.websocket.websocket_connect(
-            self.url,
-            self.ioloop,
-            callback=self.on_connected,
-            on_message_callback=self.on_message)
+                self.url,
+                self.ioloop,
+                callback=self.on_connected,
+                on_message_callback=self.on_message)
 
     # Callback for message receiving.
     # Detects between websocket close, acknowledge packet, or message packet.
@@ -127,8 +127,8 @@ class Connection(threading.Thread):
             unpacked = struct.unpack('=I' + frmt, decompressed)
             data = json.loads(unpacked[1])
             self.values[data["Topic"]] = data
-            ack_dummy_byte = chr(1)
-            self.connection.write_message(ack_dummy_byte, True)
+            # ack_dummy_byte = chr(1)
+            # self.connection.write_message(ack_dummy_byte, True)
 
     def on_close(self):
         self.connection = None
