@@ -122,7 +122,7 @@ class CanopyClientNode(object):
                     return True
             except socket.timeout:
                 rospy.logwarn(
-                    CanopyClientNode.RETRYING_MSG.format(self.name))
+                    CanopyClientNode.TIMEOUT_MSG.format(self.name))
                 rate.sleep()
             except socket.error:
                 rospy.logwarn(
