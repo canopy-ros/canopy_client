@@ -16,15 +16,23 @@ class Receiver(threading.Thread):
         super(Receiver, self).__init__()
         self.socket = socket
         self.values = dict()
+        self.running = False
 
     # Starts the Tornado IOLoop and connects to the websocket.
     # Called on thread start.
     def run(self):
-        while True:
-            data = self.socket.recv(65565)
-            if data == "HANDSHAKE":
-                continue
-            self.process_message(data)
+        self.running = True
+        while self.running:
+            try:
+                data = self.socket.recv(65565)
+                if data == "HANDSHAKE":
+                    continue
+                self.process_message(data)
+            except socket.timeout:
+                rospy.logwarn("[canopy-client] Data recv timed out")
+
+    def stop(self):
+        self.running = False
 
     # Returns the formatted last received message.
     def updates(self):
@@ -44,5 +52,5 @@ class Receiver(threading.Thread):
             unpacked = struct.unpack('=I' + frmt, decompressed)
             data = json.loads(unpacked[1])
             self.values[data["Topic"]] = data
-        except:
-            pass
+        except Exception as e:
+            rospy.logerr(e)

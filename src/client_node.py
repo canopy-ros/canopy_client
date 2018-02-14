@@ -16,6 +16,14 @@ NODE_NAME = "canopy_client"
 
 
 class CanopyClientNode(object):
+
+    CONNECTION_MSG = "[{}-canopy-client] Connected to server."
+    TIMEOUT_MSG = "[{}-canopy-client] Connection timed out. Retrying..."
+    SERVER_DOWN_MSG = "[{}-canopy-client] Connection not available. Retrying..."
+    STOPPING_TIMER_MSG = "Stopping timer..."
+    STOPPING_RECEIVER_MSG = "Stopping receiver..."
+    RETRY_RATE = 5
+
     """
     The ROS node object for the Canopy client.
     Manages all connections and subscribing.
@@ -38,6 +46,7 @@ class CanopyClientNode(object):
         self.leaflets = leaflets
         self.pub_man = pm.PublisherManager(use_local_time)
         self.timer = threading.Timer(0.1, self.descriptionSend)
+        self.timeout = 1.0 # seconds
         self.socket = None
 
     def post_leaflet_urls(self):
@@ -51,23 +60,10 @@ class CanopyClientNode(object):
     # Creates all connections and subscribers and starts them.
     # Runs a loop that checks for received messages.
     def run(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
-        self.socket.setsockopt(socket.SOL_IP, 10, 0)
-        self.socket.connect((self.host, self.port))
-        self.socket.sendto("CONNECT:{}:{}".format(self.private_key, self.name), (self.host, self.port))
-        # self.socket.settimeout(1.0)
-        # while True:
-            # try:
-                # self.socket.sendto("CONNECT:{}:{}".format(self.private_key, self.name), (self.host, self.port))
-                # reply, addr = self.socket.recvfrom(64)
-                # if reply == "HANDSHAKE":
-                    # print "[{}-canopy-client] Connected to server.".format(self.name)
-                    # break
-            # except socket.timeout:
-                # print "[{}-canopy-client] Connection timed out. Retrying...".format(self.name)
-                # continue
-        self.socket.setblocking(1)
+        good_connection = self.setup_socket()
+        if not good_connection:
+            return
+
         for topic, msg_type, trusted in self.broadcasting:
             if topic[0] != "/":
                 topic = "/" + topic
@@ -77,12 +73,44 @@ class CanopyClientNode(object):
         self.receiver = Receiver(self.socket)
         self.receiver.start()
         self.timer.start()
-        self.post_leaflet_urls()
         while not rospy.is_shutdown():
             updates = self.receiver.updates()
             for v in updates.values():
                 self.pub_man.publish(v)
+
+        rospy.loginfo(CanopyClientNode.STOPPING_TIMER_MSG)
         self.timer.cancel()
+        rospy.loginfo(CanopyClientNode.STOPPING_RECEIVER_MSG)
+        self.receiver.stop()
+
+    def setup_socket(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 65535)
+        self.socket.setsockopt(socket.SOL_IP, 10, 0)
+        self.socket.connect((self.host, self.port))
+        self.socket.setblocking(1)
+        self.socket.settimeout(self.timeout)
+        rate = rospy.Rate(CanopyClientNode.RETRY_RATE)
+        while not rospy.is_shutdown():
+            try:
+                self.socket.sendto(
+                    "CONNECT:{}:{}".format(self.private_key, self.name),
+                    (self.host, self.port))
+                reply = self.socket.recv(64)
+                if reply == "HANDSHAKE":
+                    rospy.loginfo(
+                        CanopyClientNode.CONNECTION_MSG.format(self.name))
+                    return True
+            except socket.timeout:
+                rospy.logwarn(
+                    CanopyClientNode.RETRYING_MSG.format(self.name))
+                rate.sleep()
+            except socket.error:
+                rospy.logwarn(
+                    CanopyClientNode.SERVER_DOWN_MSG.format(self.name))
+                rate.sleep()
+
+        return False
 
     # Creates a subscriber for messages of msg_type published on topic.
     def create_subscriber(self, topic, msg_type, trusted):
