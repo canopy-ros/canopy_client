@@ -2,9 +2,9 @@
 <launch>
     <node pkg="canopy_client" type="client_node.py" name="raphael_client_node" output="screen">
         <param name="name" value="raphael"/>
-        <param name="host" value="wallar.me"/>
+        <param name="host" value="wallarelvo-tower.csail.mit.edu"/>
         <param name="port" value="8080"/>
-        <param name="private_key" value="MIICXAIBAAKBgQCTUQ49FJUCVvU5tIag" /> 
+        <param name="private_key" value="MIICXAIBAAKBgQCTUQ49FJUCVvU5tIag" />
         <param name="description" value="raphael" />
         <rosparam>
             publishing:
@@ -12,7 +12,7 @@
             types:
                 - sensor_msgs/CompressedImage
             trusted:
-                - "*"
+                - "raphael"
         </rosparam>
 
     </node>
