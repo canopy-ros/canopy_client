@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find canopy_client)/launch/test/test.launch">
+        <arg name="host" value="wallar.csail.mit.edu"/>
+        <arg name="port" value="8080"/>
+        <arg name="rate" value="20"/>
+        <arg name="robot_name" value="foo"/>
+        <arg name="private_key" value="testkey"/>
+    </include>
+</launch>
