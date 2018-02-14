@@ -45,7 +45,6 @@ class CanopyClientNode(object):
         self.global_frames = global_frames
         self.leaflets = leaflets
         self.pub_man = pm.PublisherManager(use_local_time)
-        self.timer = threading.Timer(0.1, self.descriptionSend)
         self.timeout = 1.0 # seconds
         self.socket = None
 
@@ -60,28 +59,48 @@ class CanopyClientNode(object):
     # Creates all connections and subscribers and starts them.
     # Runs a loop that checks for received messages.
     def run(self):
-        good_connection = self.setup_socket()
-        if not good_connection:
+        connected = self.setup_socket()
+        if not connected:
             return
 
-        for topic, msg_type, trusted in self.broadcasting:
-            if topic[0] != "/":
-                topic = "/" + topic
-            self.create_subscriber(topic, msg_type, trusted)
-            self.senders[topic] = Sender(self.socket)
-        self.descriptionSender = Sender(self.socket)
-        self.receiver = Receiver(self.socket)
-        self.receiver.start()
-        self.timer.start()
+        self.setup_subscribers()
+        self.setup_threads()
         while not rospy.is_shutdown():
             updates = self.receiver.updates()
             for v in updates.values():
                 self.pub_man.publish(v)
 
+            if not self.descriptionSender.connected():
+                self.timer.cancel()
+                connected = self.setup_socket()
+
+                if not connected:
+                    break
+
+                self.setup_threads()
+
+        self.teardown_threads()
+
+    def setup_threads(self):
+        for topic, _, _ in self.broadcasting:
+            self.senders[topic] = Sender(self.socket)
+        self.descriptionSender = Sender(self.socket)
+        self.receiver = Receiver(self.socket)
+        self.receiver.start()
+        self.timer = threading.Timer(0.1, self.descriptionSend)
+        self.timer.start()
+
+    def teardown_threads(self):
         rospy.loginfo(CanopyClientNode.STOPPING_TIMER_MSG)
         self.timer.cancel()
         rospy.loginfo(CanopyClientNode.STOPPING_RECEIVER_MSG)
         self.receiver.stop()
+
+    def setup_subscribers(self):
+        for topic, msg_type, trusted in self.broadcasting:
+            if topic[0] != "/":
+                topic = "/" + topic
+            self.create_subscriber(topic, msg_type, trusted)
 
     def setup_socket(self):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

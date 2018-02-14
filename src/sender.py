@@ -18,6 +18,7 @@ class Sender():
         self.data = None
         self.worker = None
         self.values = dict()
+        self.good_connection = True
 
     # Starts the Tornado IOLoop and connects to the websocket.
     # Called on thread start.
@@ -34,7 +35,13 @@ class Sender():
         binary = struct.pack('=I' + frmt, binLen, payload)
         compressed = zlib.compress(binary)
         with Sender.lock:
-            self.socket.sendall(compressed)
+            try:
+                self.socket.sendall(compressed)
+            except socket.error:
+                self.good_connection = False
+
+    def connected(self):
+        return self.good_connection
 
     # Creates callback to send message in IOLoop.
     def send_message(self, data):

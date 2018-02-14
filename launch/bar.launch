@@ -8,16 +8,16 @@
         <param name="port" value="$(arg port)"/>
         <param name="private_key" value="abc" />
         <param name="description" value="bar robot" />
-        <!--<rosparam> 
+        <rosparam>
             publishing:
                 - /filtered_state
             types:
                 - geometry_msgs/PointStamped
             trusted:
                 - ".*"
-        </rosparam> -->
+        </rosparam>
     </node>
 
-    <node pkg="rostopic" type="rostopic" name="filtered_state_pub"
+    <node pkg="rostopic" type="rostopic" name="bar_filtered_state_pub"
         args="pub -sr 40 /filtered_state geometry_msgs/PointStamped '{header: {stamp: now, frame_id: base_link}, point: {x: 2.0, y: 1.0, z: 1.0}}'" />
 </launch>

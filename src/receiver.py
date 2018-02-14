@@ -30,6 +30,10 @@ class Receiver(threading.Thread):
                 self.process_message(data)
             except socket.timeout:
                 rospy.logwarn("[canopy-client] Data recv timed out")
+            except socket.error:
+                rospy.logwarn(
+                    "[canopy-client] Server is down. Killing receiver.")
+                self.running = False
 
     def stop(self):
         self.running = False
