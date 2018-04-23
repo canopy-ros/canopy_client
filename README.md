@@ -3,6 +3,11 @@
 
 This is the ROS node for the client-side application of Canopy.
 
+## Requirements
+- ROS Indigo (http://wiki.ros.org/indigo/Installation/Ubuntu)
+- Python 2.7
+- pip
+
 ## Installation
 ```
 cd <YOUR CATKIN WORKSPACE>/src
